@@ -1,0 +1,25 @@
+{
+  "name": "rstore",
+  "version": "0.1.0",
+  "description": "a reactive state manager based on Bacon.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nikitadyumin/rstore.git"
+  },
+  "keywords": [
+    "reactive"
+  ],
+  "author": "Nikita Dyumin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nikitadyumin/rstore/issues"
+  },
+  "dependencies": {
+      "baconjs": "^0.7.83"
+  },
+  "homepage": "https://github.com/nikitadyumin/rstore#readme"
+}
