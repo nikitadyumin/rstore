@@ -15,7 +15,12 @@
     "url": "git+https://github.com/nikitadyumin/rstore.git"
   },
   "keywords": [
-    "reactive"
+    "reactive",
+    "predictable",
+    "store",
+    "model",
+    "flux",
+    "frp"
   ],
   "author": "Nikita Dyumin",
   "license": "MIT",
