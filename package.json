@@ -2,8 +2,9 @@
   "name": "rstore",
   "version": "0.1.2",
   "description": "a reactive state manager based on Bacon.js",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
+    "install": "babel -d ./dist ./src",
     "test": "mocha"
   },
   "files": [
@@ -28,7 +29,11 @@
     "url": "https://github.com/nikitadyumin/rstore/issues"
   },
   "dependencies": {
-      "baconjs": "^0.7.83"
+    "baconjs": "^0.7.83"
   },
-  "homepage": "https://github.com/nikitadyumin/rstore#readme"
+  "homepage": "https://github.com/nikitadyumin/rstore#readme",
+  "devDependencies": {
+    "babel-cli": "^6.3.17",
+    "babel-preset-es2015": "^6.3.13"
+  }
 }
