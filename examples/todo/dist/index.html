@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<section class="todoapp">
+    <header>
+        <h1>todos</h1>
+        <input class="new-todo" placeholder="What needs to be done?" autofocus >
+    </header>
+    <section class="main" style="display:block">
+        <input class="toggle-all" type="checkbox">
+        <ul class="todo-list"></ul>
+    </section>
+    <footer class="footer" style="display:block">
+        <span class="todo-count">
+            <strong>0</strong> items left
+        </span>
+        <ul class="filters">
+            <li><a href="#/" data-type="all">All</a></li>
+            <li><a href="#/active" data-type="active">Active</a></li>
+            <li><a href="#/completed" data-type="complete">Completed</a></li>
+        </ul>
+        <button class="clear-completed" style="display: block;">Clear completed</button>
+    </footer>
+</section>
+<script src="bundle.js"></script>
+</body>
+</html>
