@@ -15,11 +15,48 @@ function clone(o) {
     return JSON.parse(JSON.stringify(o));
 }
 
+function defineGetter(name) {
+    return o => o[name];
+}
+
+function defineSetter(name) {
+    return (o, v) => {
+        const _clone = clone(o);
+        _clone[name] = v;
+        return _clone;
+    };
+}
+
+function lens(name) {
+    function _lens(getter, setter) {
+        return {
+            get: getter,
+            set: setter,
+            toggle: obj => setter(obj, !getter(obj)),
+            combine: l => _lens(
+                (obj) => l.get(getter(obj)),
+                (obj, val) => setter(obj, l.set(getter(obj), val))
+            ),
+            defineMapSetter: mapper => _lens(
+                getter,
+                (obj, value) => setter(obj, getter(obj).map(mapper(value)))
+            ),
+            defineFilterSetter: filter => _lens(
+                getter,
+                (obj, value) => setter(obj, getter(obj).filter(filter(value)))
+            )
+        };
+    }
+
+    return _lens(defineGetter(name), defineSetter(name));
+}
+
 // ACTIONS
 
+const KEY_CODE_ENTER = 13;
 const taskAdd$ = $('input.new-todo').asEventStream('keypress')
-    .filter(e => e.keyCode === 13)
-    .map( e => $('.new-todo').val());
+    .filter(e => e.keyCode === KEY_CODE_ENTER)
+    .map(e => $('.new-todo').val());
 
 const clearCompleted$ = $('.clear-completed').asEventStream('click');
 
@@ -40,7 +77,7 @@ const filter$ = Bacon.fromEvent(window, 'hashchange')
 
 // VIEW
 
-function getVisible(tasks, filter) {
+const getVisible = (tasks, filter) => {
     switch (filter) {
         case '':
             return tasks;
@@ -49,12 +86,12 @@ function getVisible(tasks, filter) {
         case 'completed':
             return tasks.filter(t => t.done);
     }
-}
+};
 
-function render(v) {
+const render = model => {
     $('.new-todo').val('');
-    const html = getVisible(v.tasks, v.filter).map(t =>
-            `<li class="${t.done ? 'completed' : ''}" data-id="${t.id}">
+    const html = getVisible(model.tasks, model.filter).map(t =>
+        `<li class="${t.done ? 'completed' : ''}" data-id="${t.id}">
                 <div class="view">
                     <input class="toggle" type="checkbox" ${t.done ? "checked" : ""}>
                     <label>${t.name}</label>
@@ -65,13 +102,13 @@ function render(v) {
     $('.footer')
         .find('a')
         .removeClass('selected')
-        .filter('[href="#/'+v.filter+'"]')
+        .filter('[href="#/' + model.filter + '"]')
         .addClass('selected');
 
     $('.main').find('ul').html(html);
-    const todo = v.tasks.length - v.tasks.filter(t => t.done).length;
+    const todo = model.tasks.length - model.tasks.filter(t => t.done).length;
     $('.todo-count').find('strong').text(todo);
-}
+};
 
 // STORE
 
@@ -86,36 +123,31 @@ const model = rstore({
 
 // DISPATCHERS
 
+const filterL = lens('filter');
+const tasksL = lens('tasks');
+const doneL = lens('done');
+
+const removeByIdL = tasksL
+    .defineFilterSetter(action => task => task.id !== action);
+
+const removeCompletedL = tasksL
+    .defineFilterSetter(action => task => !task.done);
+
+const toggleL = tasksL
+    .defineMapSetter(action => task => task.id === action ? doneL.toggle(task) : task);
+
 model
-    .plug(taskRemove$, (s, a) => {
-        const o = clone(s);
-        o.tasks = o.tasks.filter(t => t.id !== a);
-        return o;
-    })
-    .plug(clearCompleted$, (s) => {
-        const o = clone(s);
-        o.tasks = o.tasks.filter(t => !t.done);
-        return o;
-    })
+    .plug(taskRemove$, removeByIdL.set)
+    .plug(clearCompleted$, removeCompletedL.set)
     .plug(taskAdd$, (s, a) => {
         const o = clone(s);
-        o.maxId += 1;
-        o.tasks.push({
+        o.tasks = o.tasks.concat({
             name: a,
-            id: o.maxId,
+            id: ++o.maxId,
             done: false
         });
         return o;
     })
-    .plug(taskToggle$, (s, a) => {
-        const o = clone(s);
-        o.tasks.filter(t => t.id === a)
-            .forEach(t => t.done = !t.done);
-        return o;
-    })
-    .plug(filter$, (s, a) => {
-        const o = clone(s);
-        o.filter = a;
-        return o;
-    })
+    .plug(taskToggle$, toggleL.set)
+    .plug(filter$, filterL.set)
     .stream().onValue(render);
