@@ -3,5 +3,6 @@
  */
 
 module.exports = {
+    lens: require('./lens'),
     store: require('./store')
 };
