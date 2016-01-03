@@ -8,11 +8,13 @@ const $ = require('jquery');
 const Bacon = require('baconjs');
 const rstore = require('rstore').store;
 
-// 1: define input streams (e.g. streams of ones produced by button clicks)
+// 1: define input streams 
+// (e.g. streams of ones produced by button clicks)
 const addClick$ = Bacon.fromEventTarget($('#add'), 'click').map(() => 1);
 const subClick$ = Bacon.fromEventTarget($('#sub'), 'click').map(() => 1);
 
-// 2: define a store with the initial model (0) and ways input streams modify the model
+// 2: define a store with the initial model (0) 
+// and ways input streams modify the model
 const store = rstore(0)
     .plug(addClick$, (s, a) => s + a)
     .plug(subClick$, (s, a) => s - a);
@@ -42,7 +44,8 @@ const Counter = ({model, onAdd, onSub}) => (
     </div>
 );
 
-// define a stream of actions and expose `add` and `sub` methods to trigger the respective actions
+// define a stream of actions 
+// and expose `add` and `sub` methods to trigger the respective actions
 const actions = () => {
     const bus = new Bacon.Bus();
     return ({
@@ -62,7 +65,8 @@ const render = (model) => {
     )
 };
 
-// define the way actions are dispatched ('a' is a current state (value), 'b' is a value coming from the stream):
+// define the way actions are dispatched ('a' is a current state (value), 
+// 'b' is a value coming from the stream):
 const add = (a, b) => a + b;
 
 // define a store with an initial value, plug in the action stream and point to a render function
@@ -81,11 +85,17 @@ const l = lens('a');
 const o1 = {a: 11};
 const o2 = {a: 22};
 
-console.log( l.get(o1) ) // returns a value of the field 'a' in the object 'o1' (11)
-console.log( l.get(o2) ) // returns a value of the field 'a' in the object 'o2' (22)
+// returns a value of the field 'a' in the object 'o1' (11)
+console.log( l.get(o1) ) 
+// returns a value of the field 'a' in the object 'o2' (22)
+console.log( l.get(o2) ) 
 
-console.log( l.set(o1, 33) ) // returns a new object like 'o1', but the field 'a' is set to '33' ({a: 33}), object 'o1' stays the same
-console.log( l.set(o2, 44) ) // returns a new object like 'o2', but the field 'a' is set to '44' ({a: 44}), object 'o2' stays the same
+// returns a new object like 'o1', but the field 'a' is set to '33' 
+// ({a: 33}), object 'o1' stays the same
+console.log( l.set(o1, 33) ) 
+// returns a new object like 'o2', but the field 'a' is set to '44' 
+// ({a: 44}), object 'o2' stays the same
+console.log( l.set(o2, 44) ) 
 ```
 to provide access to nested objects, lenses can be 'combined':
 ```javascript
@@ -99,9 +109,13 @@ to provide access to nested objects, lenses can be 'combined':
             },
             b: 'immediate'
         };
-    console.log( bL.get(o) ); // returns a value of an 'b' field of the object 'o' ('immediate')
-    console.log( abL.get(o) ); // returns a value of a 'b' field in the nested object ('nested')
-    console.log( abL.set(o, 123) ); // returns a copy of 'o' with '.a.b' field set to 123 ({ a: { b: 123}, b: 'immediate'})
+    // returns a value of an 'b' field of the object 'o' ('immediate')
+    console.log( bL.get(o) ); 
+    // returns a value of a 'b' field in the nested object ('nested')
+    console.log( abL.get(o) ); 
+    // returns a copy of 'o' with '.a.b' field set to 123 
+    // ({ a: { b: 123}, b: 'immediate'})
+    console.log( abL.set(o, 123) ); 
 ```
 An example from a [todo app](https://github.com/nikitadyumin/rstore/tree/master/examples/todo):
 ```javascript
