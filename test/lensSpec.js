@@ -53,4 +53,16 @@ describe('lens', () => {
         expect(o1_.a.x).to.equal('test');
         expect(o2_.x.a).to.equal(9000);
     });
+
+    it('should provide a shortcut for setting an array field via .map', () => {
+        const o ={
+            a: [1,2,3,4,5]
+        };
+        const aL = lens('a');
+        const multL = aL.defineMapSetter(x => y => x * y);
+        expect(multL.set(o, 2).a).to.deep.equal([2,4,6,8,10]);
+
+        const tripleL = aL.defineMapSetter(() => x => 3 * x);
+        expect(tripleL.set(o).a).to.deep.equal([3,6,9,12,15]);
+    });
 });
