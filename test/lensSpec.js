@@ -65,4 +65,16 @@ describe('lens', () => {
         const tripleL = aL.defineMapSetter(() => x => 3 * x);
         expect(tripleL.set(o).a).to.deep.equal([3,6,9,12,15]);
     });
+
+    it('should provide a shortcut for setting an array field via .filter', () => {
+        const o ={
+            a: [1,2,3,4,5,6]
+        };
+        const aL = lens('a');
+        const modL = aL.defineFilterSetter(x => y => y % x);
+        expect(modL.set(o, 2).a).to.deep.equal([1,3,5]);
+
+        const mod3L = aL.defineFilterSetter(() => x => x % 3);
+        expect(mod3L.set(o).a).to.deep.equal([1,2,4,5]);
+    });
 });
