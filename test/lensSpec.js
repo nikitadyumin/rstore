@@ -1,5 +1,5 @@
 const expect = require('chai').expect;
-const lens = require('../src/index').lens;
+const lens = require('../dist/index').lens;
 
 describe('lens', () => {
 
