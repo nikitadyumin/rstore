@@ -2,9 +2,8 @@
   "name": "rstore",
   "version": "0.1.6",
   "description": "a reactive state manager based on Bacon.js",
-  "main": "./dist/index.js",
+  "main": "./dist/rstore.js",
   "scripts": {
-    "install": "babel -d ./dist ./src",
     "test": "mocha ./test"
   },
   "files": [
