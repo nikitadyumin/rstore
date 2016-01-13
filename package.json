@@ -10,6 +10,7 @@
     "src",
     "dist"
   ],
+  "tonicExampleFilename": "example.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nikitadyumin/rstore.git"
