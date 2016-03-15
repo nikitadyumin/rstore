@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("baconjs"));
+		module.exports = factory();
 	else if(typeof define === 'function' && define.amd)
-		define(["baconjs"], factory);
+		define([], factory);
 	else {
-		var a = typeof exports === 'object' ? factory(require("baconjs")) : factory(root["baconjs"]);
+		var a = factory();
 		for(var i in a) (typeof exports === 'object' ? exports : root)[i] = a[i];
 	}
-})(this, function(__WEBPACK_EXTERNAL_MODULE_4__) {
+})(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -151,41 +151,94 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	'use strict';
-
-	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 	/**
 	 * Created by ndyumin on 23.12.2015.
 	 */
 
-	var Bacon = __webpack_require__(4);
+	var runFn = function runFn(fn) {
+	    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	        args[_key - 1] = arguments[_key];
+	    }
+
+	    if (typeof fn === 'function') {
+	        fn.apply(undefined, args);
+	    }
+	};
 
 	function rstore(init) {
-	    function _store(reducers) {
-	        var model = Bacon.update.apply(Bacon, [init].concat(_toConsumableArray(reducers)));
+	    var plugged = [];
+
+	    function stream(executor) {
 	        return {
-	            plug: function plug(in$, reducer) {
-	                return _store(reducers.concat(in$, reducer));
-	            },
+	            /**
+	             * start stream
+	             */
+	            subscribe: executor,
+	            /**
+	             * @deprecated
+	             * use `.subscribe` instead
+	             */
 	            stream: function stream() {
-	                return model;
+	                return {
+	                    onValue: executor
+	                };
+	            },
+	            /**
+	             *
+	             * @param streams
+	             */
+	            plug: function plug() {
+	                for (var _len2 = arguments.length, streams = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+	                    streams[_key2] = arguments[_key2];
+	                }
+
+	                return stream(function (sink) {
+	                    plugged.push.apply(plugged, streams);
+	                    var unsubs = [];
+	                    return executor(function (init) {
+	                        unsubs.forEach(runFn);
+	                        unsubs.length = 0;
+	                        sink(init);
+	                        var clb = function clb(reducer) {
+	                            return function (v) {
+	                                return sink(init = reducer(init, v));
+	                            };
+	                        };
+
+	                        function _plug(s$, reducer) {
+	                            var observeMethod = s$.observe || s$.onValue || s$.subscribe;
+	                            var unsub = observeMethod.call(s$, clb(reducer));
+	                            unsubs.push(unsub);
+
+	                            for (var _len3 = arguments.length, _streams = Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
+	                                _streams[_key3 - 2] = arguments[_key3];
+	                            }
+
+	                            if (_streams.length !== 0) {
+	                                _plug.apply(undefined, _streams);
+	                            }
+	                        }
+
+	                        _plug.apply(undefined, plugged);
+	                        return function () {
+	                            return unsubs.forEach(runFn);
+	                        };
+	                    });
+	                });
 	            }
 	        };
 	    }
 
-	    return _store([]);
+	    return stream(function (sink) {
+	        return sink(init);
+	    });
 	}
 
 	module.exports = rstore;
-
-/***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 
 /***/ }
 /******/ ])

@@ -2,22 +2,58 @@
  * Created by ndyumin on 23.12.2015.
  */
 
-const Bacon = require('baconjs');
+const runFn = (fn, ...args) => {
+    if (typeof fn === 'function') {
+        fn(...args);
+    }
+};
 
 function rstore(init) {
-    function _store(reducers) {
-        const model = Bacon.update(init, ...reducers);
+    const plugged = [];
+
+    function stream(executor) {
         return {
-            plug: function (in$, reducer) {
-                return _store(reducers.concat(in$, reducer));
-            },
-            stream: function () {
-                return model;
-            }
+            /**
+             * start stream
+             */
+            subscribe: executor,
+            /**
+             * @deprecated
+             * use `.subscribe` instead
+             */
+            stream: () => ({
+                onValue: executor
+            }),
+            /**
+             *
+             * @param streams
+             */
+            plug: (...streams) => stream(sink => {
+                plugged.push(...streams);
+                const unsubs = [];
+                return executor(init => {
+                    unsubs.forEach(runFn);
+                    unsubs.length = 0;
+                    sink(init);
+                    const clb = reducer => v => sink(init = reducer(init, v));
+
+                    function _plug(s$, reducer, ..._streams) {
+                        const observeMethod = s$.observe || s$.onValue || s$.subscribe;
+                        const unsub = observeMethod.call(s$, clb(reducer));
+                        unsubs.push(unsub);
+                        if (_streams.length !== 0) {
+                            _plug(..._streams);
+                        }
+                    }
+
+                    _plug(...plugged);
+                    return () => unsubs.forEach(runFn);
+                });
+            })
         };
     }
 
-    return _store([]);
+    return stream(sink => sink(init));
 }
 
 module.exports = rstore;
