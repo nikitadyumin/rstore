@@ -155,6 +155,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
+	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
 	/**
 	 * Created by ndyumin on 23.12.2015.
 	 */
@@ -167,6 +169,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (typeof fn === 'function') {
 	        fn.apply(undefined, args);
 	    }
+	};
+	var runUnsub = function runUnsub(fn) {
+	    return typeof fn === 'function' ? fn() : (typeof fn === 'undefined' ? 'undefined' : _typeof(fn)) === 'object' ? typeof fn.unsubscribe === 'function' ? fn.unsubscribe() : console.log('ehm...', fn) : console.log('unknown subscription', fn);
 	};
 
 	function rstore(init) {
@@ -200,7 +205,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    plugged.push.apply(plugged, streams);
 	                    var unsubs = [];
 	                    return executor(function (init) {
-	                        unsubs.forEach(runFn);
+	                        unsubs.forEach(runUnsub);
 	                        unsubs.length = 0;
 	                        sink(init);
 	                        var clb = function clb(reducer) {
@@ -225,7 +230,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                        _plug.apply(undefined, plugged);
 	                        return function () {
-	                            return unsubs.forEach(runFn);
+	                            return unsubs.forEach(runUnsub);
 	                        };
 	                    });
 	                });

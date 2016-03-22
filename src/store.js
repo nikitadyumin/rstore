@@ -2,11 +2,14 @@
  * Created by ndyumin on 23.12.2015.
  */
 
-const runFn = (fn, ...args) => {
-    if (typeof fn === 'function') {
-        fn(...args);
-    }
-};
+const runUnsub = (fn) =>
+    typeof fn === 'function'
+        ? fn()
+        : typeof fn === 'object'
+            ? typeof fn.unsubscribe ===  'function'
+                ? fn.unsubscribe()
+                : console.log('ehm...', fn)
+            : console.log('unknown subscription', fn);
 
 function rstore(init) {
     const plugged = [];
@@ -32,7 +35,7 @@ function rstore(init) {
                 plugged.push(...streams);
                 const unsubs = [];
                 return executor(init => {
-                    unsubs.forEach(runFn);
+                    unsubs.forEach(runUnsub);
                     unsubs.length = 0;
                     sink(init);
                     const clb = reducer => v => sink(init = reducer(init, v));
@@ -47,7 +50,7 @@ function rstore(init) {
                     }
 
                     _plug(...plugged);
-                    return () => unsubs.forEach(runFn);
+                    return () => unsubs.forEach(runUnsub);
                 });
             })
         };
