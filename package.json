@@ -1,7 +1,7 @@
 {
   "name": "rstore",
-  "version": "0.2.0",
-  "description": "a reactive state manager based on Bacon.js",
+  "version": "0.2.1",
+  "description": "a reactive state manager",
   "main": "./dist/rstore.js",
   "scripts": {
     "test": "mocha ./test"
@@ -17,6 +17,8 @@
   },
   "keywords": [
     "reactive",
+    "rxjs",
+    "rx",
     "predictable",
     "store",
     "model",
