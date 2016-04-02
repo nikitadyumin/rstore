@@ -1,5 +1,5 @@
 # rstore
-explicit, declarative and composable store\model based on Bacon.js
+explicit, declarative and composable reactive store\model
 
 ## basic example
 [source](https://github.com/nikitadyumin/rstore/tree/master/examples/counter)
