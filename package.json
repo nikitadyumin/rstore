@@ -19,6 +19,8 @@
     "reactive",
     "rxjs",
     "rx",
+    "bacon",
+    "baconjs",
     "predictable",
     "store",
     "model",
