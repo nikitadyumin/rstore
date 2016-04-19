@@ -64,16 +64,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _store2 = _interopRequireDefault(_store);
 
+	var _utils = __webpack_require__(4);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	/**
-	 * Created by ndyumin on 23.12.2015.
-	 */
-
 	module.exports = {
-	  lens: _lens2.default,
-	  store: _store2.default
-	};
+	    fromEvent: _utils.fromEvent,
+	    lens: _lens2.default,
+	    store: _store2.default
+	}; /**
+	    * Created by ndyumin on 23.12.2015.
+	    */
 
 /***/ },
 /* 1 */
@@ -161,15 +162,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Created by ndyumin on 23.12.2015.
 	 */
 
-	var runFn = function runFn(fn) {
-	    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-	        args[_key - 1] = arguments[_key];
-	    }
-
-	    if (typeof fn === 'function') {
-	        fn.apply(undefined, args);
-	    }
-	};
 	var runUnsub = function runUnsub(fn) {
 	    return typeof fn === 'function' ? fn() : (typeof fn === 'undefined' ? 'undefined' : _typeof(fn)) === 'object' ? typeof fn.unsubscribe === 'function' ? fn.unsubscribe() : console.log('ehm...', fn) : console.log('unknown subscription', fn);
 	};
@@ -197,8 +189,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	             * @param streams
 	             */
 	            plug: function plug() {
-	                for (var _len2 = arguments.length, streams = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-	                    streams[_key2] = arguments[_key2];
+	                for (var _len = arguments.length, streams = Array(_len), _key = 0; _key < _len; _key++) {
+	                    streams[_key] = arguments[_key];
 	                }
 
 	                return stream(function (sink) {
@@ -219,8 +211,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            var unsub = observeMethod.call(s$, clb(reducer));
 	                            unsubs.push(unsub);
 
-	                            for (var _len3 = arguments.length, _streams = Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
-	                                _streams[_key3 - 2] = arguments[_key3];
+	                            for (var _len2 = arguments.length, _streams = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+	                                _streams[_key2 - 2] = arguments[_key2];
 	                            }
 
 	                            if (_streams.length !== 0) {
@@ -244,6 +236,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	module.exports = rstore;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.fromEvent = fromEvent;
+	/**
+	 * Created by ndyumin on 18.04.2016.
+	 */
+	function fromEvent(node, eventName) {
+	    return {
+	        subscribe: function subscribe(observer) {
+	            node.addEventListener(eventName, observer);
+	            return function () {
+	                return node.removeEventListener(eventName, observer);
+	            };
+	        }
+	    };
+	}
 
 /***/ }
 /******/ ])
