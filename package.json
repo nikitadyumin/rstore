@@ -1,6 +1,6 @@
 {
   "name": "rstore",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "a reactive state manager",
   "main": "./dist/rstore.js",
   "scripts": {
@@ -16,12 +16,16 @@
     "url": "git+https://github.com/nikitadyumin/rstore.git"
   },
   "keywords": [
+    "es6",
+    "es2015",
     "reactive",
     "rxjs",
     "rx",
     "bacon",
     "baconjs",
     "predictable",
+    "pure",
+    "functional",
     "store",
     "model",
     "flux",
