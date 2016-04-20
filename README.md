@@ -49,6 +49,29 @@ store(0)
 ```
 In this example `render` is called for each model state (including the explicitely defined initial value).
 
+## composability example
+```javascript
+const $dec = document.getElementById('dec');
+const $inc = document.getElementById('inc');
+const $inp = document.getElementById('inp');
+
+const counter$ = store(0)
+  .plug(
+    fromEvent($dec, 'click'), (s,u) => s - 1,
+    fromEvent($inc, 'click'), (s,u) => s + 1)
+
+const str$ = store('')
+  .plug(fromEvent($inp, 'change'), (s,u) => u.target.value)
+
+store({
+  n: 0,
+  s: ''
+}).plug(
+  counter$, (s, u) => Object.assign({}, s, {n: u}),
+  str$, (s, u) => Object.assign({}, s, {s: u})
+).subscribe(x => console.log(x));
+```
+
 ## extended example (React)
 In case of a need for more imperative code, Bacon.Bus can be used. It produces a stream, where values can be pushed manually:
 [source](https://github.com/nikitadyumin/rstore/blob/master/examples/counter-react/src/index.js)
