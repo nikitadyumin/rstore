@@ -1,27 +1,51 @@
 # rstore
 explicit, declarative and composable reactive store\model
 
-## basic example
+## basic examples
+
+### from DOM Events:
+```javascript
+const {store, fromEvent} = require('./dist/rstore');
+
+const $inc = document.getElementById('inc');
+const $dec = document.getElementById('dec');
+
+store(0)
+    .plug(
+        fromEvent($inc, 'click'), (s, u) => s + 1,
+        fromEvent($dec, 'click'), (s, u) => s - 1)
+    .subscribe(v => console.log(v));
+```
+
+### from RxJS Observables:
+```javascript
+const {store} = require('./dist/rstore');
+const Rx = require('rxjs');
+
+const $inc = document.getElementById('inc');
+const $dec = document.getElementById('dec');
+
+store(0)
+    .plug(
+        Rx.Observable.fromEvent($inc, 'click'), (s, u) => s + 1,
+        Rx.Observable.fromEvent($dec, 'click'), (s, u) => s - 1)
+    .subscribe(v => console.log(v));
+```
+
+### from Bacon Streams
 [source](https://github.com/nikitadyumin/rstore/tree/master/examples/counter)
 ```javascript
-const $ = require('jquery');
+const {store} = require('./dist/rstore');
 const Bacon = require('baconjs');
-const rstore = require('rstore').store;
 
-// 1: define input streams 
-// (e.g. streams of ones produced by button clicks)
-const addClick$ = Bacon.fromEventTarget($('#add'), 'click').map(() => 1);
-const subClick$ = Bacon.fromEventTarget($('#sub'), 'click').map(() => 1);
+const $inc = document.getElementById('inc');
+const $dec = document.getElementById('dec');
 
-// 2: define a store with the initial model (0) 
-// and ways input streams modify the model
-const store = rstore(0)
-    .plug(addClick$, (s, a) => s + a)
-    .plug(subClick$, (s, a) => s - a);
-
-// 3: define the way model is rendered
-const render = (model) => $('#result').text(model);
-store.stream().onValue(render);
+store(0)
+    .plug(
+        Bacon.fromEvent($inc, 'click'), (s, u) => s + 1,
+        Bacon.fromEvent($dec, 'click'), (s, u) => s - 1)
+    .subscribe(v => console.log(v));
 ```
 In this example `render` is called for each model state (including the explicitely defined initial value).
 
