@@ -2,61 +2,66 @@
  * Created by ndyumin on 23.12.2015.
  */
 
-const runUnsub = (fn) =>
-    typeof fn === 'function'
-        ? fn()
-        : typeof fn === 'object'
-            ? typeof fn.unsubscribe ===  'function'
-                ? fn.unsubscribe()
-                : console.log('ehm...', fn)
-            : console.log('unknown subscription', fn);
+function runUnsub(subscription) {
+    if (typeof subscription === 'function') {
+        return subscription();
+    }
+    if (typeof subscription === 'object') {
+        if (typeof subscription.unsubscribe === 'function') {
+            return subscription.unsubscribe();
+        }
+        return console.log('ehm...', subscription);
+    }
+    return console.log('unknown subscription type', subscription);
+}
+
+function wrapObservable(s$) {
+    if (typeof s$.observe === 'function') {
+        return {subscribe: s$.observe.bind(s$)};
+    }
+    if (typeof s$.onValue === 'function') {
+        return {subscribe: s$.onValue.bind(s$)};
+    }
+    return s$;
+}
 
 function rstore(init) {
     const plugged = [];
 
-    function stream(executor) {
+    function _store(model) {
+        const executor = next => {
+            next(model);
+            const subscriptions = [];
+            const reducers = [].concat(plugged);
+            const clb = reducer => v => next(model = reducer(model, v));
+            while (reducers.length) {
+                const s$ = wrapObservable(reducers.shift());
+                const reduce = reducers.shift();
+                subscriptions.push(s$.subscribe(clb(reduce)));
+            }
+            return () => subscriptions.forEach(runUnsub);
+        };
+
         return {
             /**
-             * start stream
-             */
-            subscribe: executor,
-            /**
              * @deprecated
-             * use `.subscribe` instead
+             * use .subscribe instead
              */
             stream: () => ({
-                onValue: executor
+                onValue: (console.warn('this method will be removed in 0.3, use .subscribe instead'), executor)
             }),
             /**
              *
-             * @param streams
              */
-            plug: (...streams) => stream(sink => {
+            subscribe: executor,
+            plug: (...streams) => {
                 plugged.push(...streams);
-                const unsubs = [];
-                return executor(init => {
-                    unsubs.forEach(runUnsub);
-                    unsubs.length = 0;
-                    sink(init);
-                    const clb = reducer => v => sink(init = reducer(init, v));
-
-                    function _plug(s$, reducer, ..._streams) {
-                        const observeMethod = s$.observe || s$.onValue || s$.subscribe;
-                        const unsub = observeMethod.call(s$, clb(reducer));
-                        unsubs.push(unsub);
-                        if (_streams.length !== 0) {
-                            _plug(..._streams);
-                        }
-                    }
-
-                    _plug(...plugged);
-                    return () => unsubs.forEach(runUnsub);
-                });
-            })
+                return _store(model);
+            }
         };
     }
 
-    return stream(sink => sink(init));
+    return _store(init);
 }
 
 module.exports = rstore;

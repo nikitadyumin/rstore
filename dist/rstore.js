@@ -162,77 +162,74 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Created by ndyumin on 23.12.2015.
 	 */
 
-	var runUnsub = function runUnsub(fn) {
-	    return typeof fn === 'function' ? fn() : (typeof fn === 'undefined' ? 'undefined' : _typeof(fn)) === 'object' ? typeof fn.unsubscribe === 'function' ? fn.unsubscribe() : console.log('ehm...', fn) : console.log('unknown subscription', fn);
-	};
+	function runUnsub(subscription) {
+	    if (typeof subscription === 'function') {
+	        return subscription();
+	    }
+	    if ((typeof subscription === 'undefined' ? 'undefined' : _typeof(subscription)) === 'object') {
+	        if (typeof subscription.unsubscribe === 'function') {
+	            return subscription.unsubscribe();
+	        }
+	        return console.log('ehm...', subscription);
+	    }
+	    return console.log('unknown subscription type', subscription);
+	}
+
+	function wrapObservable(s$) {
+	    if (typeof s$.observe === 'function') {
+	        return { subscribe: s$.observe.bind(s$) };
+	    }
+	    if (typeof s$.onValue === 'function') {
+	        return { subscribe: s$.onValue.bind(s$) };
+	    }
+	    return s$;
+	}
 
 	function rstore(init) {
 	    var plugged = [];
 
-	    function stream(executor) {
+	    function _store(model) {
+	        var executor = function executor(next) {
+	            next(model);
+	            var subscriptions = [];
+	            var reducers = [].concat(plugged);
+	            var clb = function clb(reducer) {
+	                return function (v) {
+	                    return next(model = reducer(model, v));
+	                };
+	            };
+	            while (reducers.length) {
+	                var s$ = wrapObservable(reducers.shift());
+	                var reduce = reducers.shift();
+	                subscriptions.push(s$.subscribe(clb(reduce)));
+	            }
+	            return function () {
+	                return subscriptions.forEach(runUnsub);
+	            };
+	        };
+
 	        return {
 	            /**
-	             * start stream
-	             */
-	            subscribe: executor,
-	            /**
 	             * @deprecated
-	             * use `.subscribe` instead
+	             * use .subscribe instead
 	             */
 	            stream: function stream() {
 	                return {
-	                    onValue: executor
+	                    onValue: (console.warn('this method will be removed in 0.3, use .subscribe instead'), executor)
 	                };
 	            },
 	            /**
 	             *
-	             * @param streams
 	             */
+	            subscribe: executor,
 	            plug: function plug() {
-	                for (var _len = arguments.length, streams = Array(_len), _key = 0; _key < _len; _key++) {
-	                    streams[_key] = arguments[_key];
-	                }
-
-	                return stream(function (sink) {
-	                    plugged.push.apply(plugged, streams);
-	                    var unsubs = [];
-	                    return executor(function (init) {
-	                        unsubs.forEach(runUnsub);
-	                        unsubs.length = 0;
-	                        sink(init);
-	                        var clb = function clb(reducer) {
-	                            return function (v) {
-	                                return sink(init = reducer(init, v));
-	                            };
-	                        };
-
-	                        function _plug(s$, reducer) {
-	                            var observeMethod = s$.observe || s$.onValue || s$.subscribe;
-	                            var unsub = observeMethod.call(s$, clb(reducer));
-	                            unsubs.push(unsub);
-
-	                            for (var _len2 = arguments.length, _streams = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-	                                _streams[_key2 - 2] = arguments[_key2];
-	                            }
-
-	                            if (_streams.length !== 0) {
-	                                _plug.apply(undefined, _streams);
-	                            }
-	                        }
-
-	                        _plug.apply(undefined, plugged);
-	                        return function () {
-	                            return unsubs.forEach(runUnsub);
-	                        };
-	                    });
-	                });
+	                plugged.push.apply(plugged, arguments);
+	                return _store(model);
 	            }
 	        };
 	    }
 
-	    return stream(function (sink) {
-	        return sink(init);
-	    });
+	    return _store(init);
 	}
 
 	module.exports = rstore;

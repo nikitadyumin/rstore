@@ -11,6 +11,10 @@ const Rx = require('rxjs');
 const most = require('most');
 
 describe('store', () => {
+    it('works without change sources', done=> {
+        rstore.store(123).subscribe(v => v === 123 ? done() : done(new Error(v)));
+    });
+
     it('works with 1 stream of changes', (done) => {
         const s0$ = new Bacon.Bus();
 
@@ -71,7 +75,7 @@ describe('store', () => {
 
         function test(val) {
             calls += 1;
-            if (calls === stream1.length + stream2.length + 2) {
+            if (calls === stream1.length + stream2.length + 1) {
                 expect(val).to.equal(15);
                 done();
             }
@@ -138,7 +142,7 @@ describe('store', () => {
 
         function test(val) {
             calls += 1;
-            if (calls === stream1.length * 6 + 3) {
+            if (calls === stream1.length * 6 + 1) {
                 expect(val).to.equal(0);
                 done();
             }
@@ -218,26 +222,24 @@ describe('store', () => {
         action$.push('sdfsdf');
     });
 
-    xit('unsubscribes correctly', (done) => {
+    it('unsubscribes correctly', (done) => {
         const values = [1, 2, 3, 4];
         const s0$ = new Bacon.Bus();
-        let i  =0;
         const s1$ = Rx.Observable.create(o => {
-            console.log('=',i++);
             const timeouts = values.map(v => setTimeout(() => o.next(v), 10));
             return () => timeouts.forEach(clearInterval);
         });
+        const s2$ = most.from(values);
 
         let calls = 0;
-        const expectedCallsNumber = values.length * 2 + 2;
+        const expectedCallsNumber = values.length * 3 + 1;
 
         function test(_value) {
-            console.log(_value);
             calls += 1;
             if (calls === expectedCallsNumber) {
                 setTimeout(() => {
                     if (calls === expectedCallsNumber) {
-                        expect(_value).to.equal(30);
+                        expect(_value).to.equal(40);
                         done();
                     } else {
                         done(new Error('extra calls'))
@@ -246,12 +248,15 @@ describe('store', () => {
             }
         }
 
+        const sum = (s, u) => s + u;
+
         rstore.store(10)
-            .plug(s0$, (s, u) => s + u)
-            .plug(s1$, (s, u) => '-' +  u)
+            .plug(s0$, sum)
+            .plug(s1$, sum)
+            .plug(s2$, sum)
             .subscribe(test);
 
-        values.forEach(v => setTimeout(() => s0$.push(v), 7, v));
+        values.forEach(v => setTimeout(() => s0$.push(v), 0, v));
     });
 
     it('works with rxjs and mostjs', (done) => {
