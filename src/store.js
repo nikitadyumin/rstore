@@ -2,7 +2,7 @@
  * Created by ndyumin on 23.12.2015.
  */
 
-function runUnsub(subscription) {
+function runUnsubscribe(subscription) {
     if (typeof subscription === 'function') {
         return subscription();
     }
@@ -26,20 +26,31 @@ function wrapObservable(s$) {
 }
 
 function rstore(init) {
-    const plugged = [];
+    const observables = [];
+    const observers = [];
+    const subscriptions = [];
+    let started = false;
+    const broadcast = v => observers.forEach(fn => fn(v));
 
     function _store(model) {
-        const executor = next => {
-            next(model);
-            const subscriptions = [];
-            const reducers = [].concat(plugged);
-            const clb = reducer => v => next(model = reducer(model, v));
-            while (reducers.length) {
-                const s$ = wrapObservable(reducers.shift());
-                const reduce = reducers.shift();
+        const clb = reducer => v => broadcast(model = reducer(model, v));
+
+        const observe = streams => {
+            while (streams.length > 1) {
+                const s$ = wrapObservable(streams.shift());
+                const reduce = streams.shift();
                 subscriptions.push(s$.subscribe(clb(reduce)));
             }
-            return () => subscriptions.forEach(runUnsub);
+        };
+
+        const executor = next => {
+            next(model);
+            observers.push(next);
+            if (!started) {
+                started = true;
+                observe([].concat(observables));
+            }
+            return _store(model);
         };
 
         return {
@@ -54,8 +65,22 @@ function rstore(init) {
              *
              */
             subscribe: executor,
+            /**
+             *
+             */
+            unsubscribe: () => {
+                started = false;
+                subscriptions.forEach(runUnsubscribe);
+                return _store(model);
+            },
+            /**
+             *
+             */
             plug: (...streams) => {
-                plugged.push(...streams);
+                observables.push(...streams);
+                if (started) {
+                    observe(streams);
+                }
                 return _store(model);
             }
         };
