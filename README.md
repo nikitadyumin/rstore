@@ -1,53 +1,36 @@
 # rstore
 explicit, declarative and composable reactive store\model
 
-## basic examples
+## Introduction
+build complex UIs with trivial steps:
 
-### from DOM Events:
+1. describe a model (properties, initial state):
+
 ```javascript
-const {store, fromEvent} = require('./dist/rstore');
-
-const $inc = document.getElementById('inc');
-const $dec = document.getElementById('dec');
-
-store(0)
-    .plug(
-        fromEvent($inc, 'click'), (s, u) => s + 1,
-        fromEvent($dec, 'click'), (s, u) => s - 1)
-    .subscribe(v => console.log(v));
+const {store} = require('rstore'); 
+const myStore = store(0);
 ```
 
-### from RxJS Observables:
+2. define sources of changes (using `fromEvent` helper or Rx, Bacon, most streams, see [defining inputs](define_changes.md))
+
 ```javascript
-const {store} = require('./dist/rstore');
-const Rx = require('rxjs');
-
-const $inc = document.getElementById('inc');
-const $dec = document.getElementById('dec');
-
-store(0)
-    .plug(
-        Rx.Observable.fromEvent($inc, 'click'), (s, u) => s + 1,
-        Rx.Observable.fromEvent($dec, 'click'), (s, u) => s - 1)
-    .subscribe(v => console.log(v));
+const inc$ = fromEvent(document.getElementById('inc'), 'click');
+const dec$ = fromEvent(document.getElementById('dec'), 'click');
 ```
 
-### from Bacon Streams
-[source](https://github.com/nikitadyumin/rstore/tree/master/examples/counter)
+3. define how these changes affect the model:
+
 ```javascript
-const {store} = require('./dist/rstore');
-const Bacon = require('baconjs');
-
-const $inc = document.getElementById('inc');
-const $dec = document.getElementById('dec');
-
-store(0)
-    .plug(
-        Bacon.fromEvent($inc, 'click'), (s, u) => s + 1,
-        Bacon.fromEvent($dec, 'click'), (s, u) => s - 1)
-    .subscribe(v => console.log(v));
+myStore
+    .plug(inc$, (state, _update) => state + 1)
+    .plug(dec$, (state, _update) => state - 1);
 ```
-In this example `render` is called for each model state (including the explicitely defined initial value).
+
+4. subscribe to the store and get an updated model on every change:
+
+```javascript
+myStore.subscribe(model => console.log(model));
+```
 
 ## composability example
 ```javascript
