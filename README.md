@@ -4,21 +4,21 @@ explicit, declarative and composable reactive store\model
 ## Introduction
 build complex UIs with trivial steps:
 
-1. describe a model (properties, initial state):
+1) describe a model (properties, initial state):
 
 ```javascript
 const {store} = require('rstore'); 
 const myStore = store(0);
 ```
 
-2. define sources of changes (using `fromEvent` helper or Rx, Bacon, most streams, see [defining inputs](define_changes.md))
+2) define sources of changes (using `fromEvent` helper or Rx, Bacon, most streams, see [defining inputs](define_changes.md))
 
 ```javascript
 const inc$ = fromEvent(document.getElementById('inc'), 'click');
 const dec$ = fromEvent(document.getElementById('dec'), 'click');
 ```
 
-3. define how these changes affect the model:
+3) define how these changes affect the model:
 
 ```javascript
 myStore
@@ -26,7 +26,7 @@ myStore
     .plug(dec$, (state, _update) => state - 1);
 ```
 
-4. subscribe to the store and get an updated model on every change:
+4) subscribe to the store and get an updated model on every change:
 
 ```javascript
 myStore.subscribe(model => console.log(model));
