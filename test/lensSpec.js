@@ -1,5 +1,6 @@
+require('babel-core/register');
 const expect = require('chai').expect;
-const lens = require('../dist/rstore').lens;
+const lens = require('../src').lens;
 
 describe('lens', () => {
 

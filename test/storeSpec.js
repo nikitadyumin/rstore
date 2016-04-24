@@ -2,9 +2,10 @@
  * Created by ndyumin on 14.03.2016.
  */
 "use strict";
+require('babel-core/register');
 
 const expect = require('chai').expect;
-const rstore = require('../dist/rstore');
+const rstore = require('../src');
 
 const Bacon = require('baconjs');
 const Rx = require('rxjs');
