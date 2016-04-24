@@ -262,7 +262,7 @@ describe('store', () => {
     it('works with rxjs and mostjs', (done) => {
         const values = [1, 2, 3, 4];
         const s0$ = Bacon.fromArray(values);
-        const s1$ = Rx.Observable.fromArray(values);
+        const s1$ = Rx.Observable.from(values);
         const s2$ = most.from(values);
 
         let calls = 0;
