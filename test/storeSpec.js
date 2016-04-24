@@ -292,4 +292,25 @@ describe('store', () => {
             ).subscribe(test);
 
     });
+
+    it("fromEvent factory", (done)=> {
+        const eventName = 'click';
+        const data = 'data';
+        const mock = {
+            addEventListener: function(event, clb) {
+                this.clb = clb;
+            },
+            removeEventListener: function(event, clb) {
+                this.clb = null;
+            },
+            fireEvent: function(data) {
+                this.clb(data);
+            }
+        };
+        const obs = rstore.fromEvent(mock, eventName);
+        obs.subscribe(function(v) {
+           done(v === data ? null : new Error('wrong data'))
+        });
+        mock.fireEvent(data);
+    })
 });
