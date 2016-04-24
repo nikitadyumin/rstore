@@ -114,4 +114,4 @@ model
     })
     .plug(taskToggle$, toggleL.set)
     .plug(filter$, filterL.set)
-    .stream().onValue(render);
+    .subscribe(render);

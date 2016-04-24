@@ -29,6 +29,6 @@ const render = (model) => {
     )
 };
 
-const _store = store(0)
+store(0)
     .plug(_dispatcher.stream(), (s, a) => s + a)
-    .stream().onValue(render);
+    .subscribe(render);
