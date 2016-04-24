@@ -1,24 +1,25 @@
 # rstore
-explicit, declarative and composable reactive store\model
+
+straightforward, explicit, declarative and composable reactive store\model
 
 ## Introduction
 build complex UIs with trivial steps:
 
-1) describe a model (properties, initial state):
+1 ) describe a model (properties, initial state):
 
 ```javascript
 const {store} = require('rstore'); 
 const myStore = store(0);
 ```
 
-2) define sources of changes (using `fromEvent` helper or Rx, Bacon, most streams, see [defining inputs](define_changes.md))
+2 ) define sources of changes (using `fromEvent` helper or Rx, Bacon, most streams, see [defining inputs](define_changes.md))
 
 ```javascript
 const inc$ = fromEvent(document.getElementById('inc'), 'click');
 const dec$ = fromEvent(document.getElementById('dec'), 'click');
 ```
 
-3) define how these changes affect the model:
+3 ) define how these changes affect the model:
 
 ```javascript
 myStore
@@ -26,112 +27,50 @@ myStore
     .plug(dec$, (state, _update) => state - 1);
 ```
 
-4) subscribe to the store and get an updated model on every change:
+4 ) subscribe to the store and get an updated model on every change:
 
 ```javascript
 myStore.subscribe(model => console.log(model));
 ```
 
-## composability example
+[See more examples](examples/examples.md)
+
+## Composability
+
+Stores themselves can be combined: 
 ```javascript
-const {store, fromEvent} = require('./dist/rstore');
+// store 1 (counter from the previous example)
+const counter1 = store(0);
+const inc1$ = fromEvent(document.getElementById('inc1'), 'click');
+const dec1$ = fromEvent(document.getElementById('dec1'), 'click');
+counter1
+    .plug(inc1$, (state, _update) => state + 1)
+    .plug(dec1$, (state, _update) => state - 1);
 
-const $dec = document.getElementById('dec');
-const $inc = document.getElementById('inc');
-const $inp = document.getElementById('inp');
+counter1.subscribe(model => document.getElementById('res1').textContent = model);
 
-const counter$ = store(0)
-  .plug(
-    fromEvent($dec, 'click'), (s,u) => s - 1,
-    fromEvent($inc, 'click'), (s,u) => s + 1)
+// store 2 (a second counter, similar to counter 1)
+const counter2 = store(0);
+const inc2$ = fromEvent(document.getElementById('inc2'), 'click');
+const dec2$ = fromEvent(document.getElementById('dec2'), 'click');
+counter2
+    .plug(inc2$, (state, _update) => state + 1)
+    .plug(dec2$, (state, _update) => state - 1);
 
-const label$ = store('')
-  .plug(fromEvent($inp, 'change'), (s,u) => u.target.value)
+counter2.subscribe(model => document.getElementById('res2').textContent = model);
 
+// a combining store, stores current states from both counters 
+// notifies subscribers if any of the counter values changes 
 store({
-  n: 0,
-  s: ''
+    c1 : 0,
+    c2 : 0
 }).plug(
-  counter$, (s, u) => Object.assign({}, s, {n: u}),
-  label$, (s, u) => Object.assign({}, s, {s: u})
-).subscribe(x => console.log(x));
+    counter1, (s, u) => Object.assign({}, s, {c1: u}),
+    counter2, (s, u) => Object.assign({}, s, {c2: u})
+).subscribe(model => document.getElementById('total').textContent = model.c1 + model.c2);
 ```
 
-the same example with lenses (to access (nested) model fields easily)
-```javascript
-const {store, lens, fromEvent} = require('./dist/rstore');
-const $dec = document.getElementById('dec');
-const $inc = document.getElementById('inc');
-const $inp = document.getElementById('inp');
-const nL = lens('n');
-const sL = lens('s');
-
-const counter$ = store(0)
-  .plug(
-    fromEvent($dec, 'click'), (s,u) => s - 1,
-    fromEvent($inc, 'click'), (s,u) => s + 1)
-
-const label$ = store('')
-  .plug(fromEvent($inp, 'change'), (s,u) => u.target.value)
-
-store({
-  n: 0,
-  s: ''
-}).plug(
-  counter$, (s, u) => nL.set(s, u),
-  label$, (s, u) => sL.set(s, u)
-).subscribe(x => console.log(x));
-```
-
-## extended example (React)
-In case of a need for more imperative code, Bacon.Bus can be used. It produces a stream, where values can be pushed manually:
-[source](https://github.com/nikitadyumin/rstore/blob/master/examples/counter-react/src/index.js)
-
-```javascript
-import React from 'react';
-import Bacon from 'baconjs';
-import { render  as renderDom } from 'react-dom';
-import { store } from 'rstore';
-
-// define a React component (via render method)
-const Counter = ({model, onAdd, onSub}) => (
-    <div>
-        <div>{model}</div>
-        <button onClick={onAdd}>+</button>
-        <button onClick={onSub}>-</button>
-    </div>
-);
-
-// define a stream of actions 
-// and expose `add` and `sub` methods to trigger the respective actions
-const actions = () => {
-    const bus = new Bacon.Bus();
-    return ({
-        stream: () => bus,
-        add: () => bus.push(1),
-        sub: () => bus.push(-1)
-    });
-};
-// instantiate the actions stream (bus)
-const _actions = actions();
-
-// define a render function
-const render = (model) => {
-    renderDom(
-        <Counter model={model} onAdd={_actions.add} onSub={_actions.sub}/>,
-        document.getElementById('root')
-    )
-};
-
-// define the way actions are dispatched ('a' is a current state (value), 
-// 'b' is a value coming from the stream):
-const add = (a, b) => a + b;
-
-// define a store with an initial value, plug in the action stream and point to a render function
-const _store = store(0)
-    .plug(_actions.stream(), add)
-    .stream().onValue(render);
-```
+[more on composability](composability.md)
 
 ## easy access to model fields
 In many cases model modification functions are just setters that take the current state and a new value as inputs and produce a new model. It might be hard to access\update deeply nested fields as it is desirable that functions stay pure and data stays immutable.
@@ -191,5 +130,5 @@ const model = rs.store({
 //... mode code here
 model
     .plug(filter$, filterL.set)
-    .stream().onValue(render);
+    .subscribe(render);
 ```
