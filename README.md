@@ -1,5 +1,6 @@
 # rstore
 [![Join the chat at https://gitter.im/nikitadyumin/rstore](https://badges.gitter.im/nikitadyumin/rstore.svg)](https://gitter.im/nikitadyumin/rstore?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/nikitadyumin/rstore.svg?branch=master)](https://travis-ci.org/nikitadyumin/rstore)
 
 a straightforward, explicit, declarative and composable reactive store/model
 
