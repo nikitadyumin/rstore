@@ -1,6 +1,7 @@
 # rstore
 [![Join the chat at https://gitter.im/nikitadyumin/rstore](https://badges.gitter.im/nikitadyumin/rstore.svg)](https://gitter.im/nikitadyumin/rstore?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-straightforward, explicit, declarative and composable reactive store\model
+
+a straightforward, explicit, declarative and composable reactive store/model
 
 ## Introduction
 build complex UIs with trivial steps:
