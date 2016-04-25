@@ -25,68 +25,65 @@ function wrapObservable(s$) {
     return s$;
 }
 
-function rstore(init) {
+function rstore(state) {
     const observables = [];
     const observers = [];
     const subscriptions = [];
     let started = false;
-    const broadcast = v => observers.forEach(fn => fn(v));
+    const broadcast = state => observers.forEach(fn => fn(state));
+    const clb = reducer => update => broadcast(state = reducer(state, update));
 
-    function _store(model) {
-        const clb = reducer => v => broadcast(model = reducer(model, v));
+    const observe = streams => {
+        while (streams.length > 1) {
+            const s$ = wrapObservable(streams.shift());
+            const reduce = streams.shift();
+            subscriptions.push(s$.subscribe(clb(reduce)));
+        }
+    };
 
-        const observe = streams => {
-            while (streams.length > 1) {
-                const s$ = wrapObservable(streams.shift());
-                const reduce = streams.shift();
-                subscriptions.push(s$.subscribe(clb(reduce)));
+    const executor = next => {
+        next(state);
+        observers.push(next);
+        if (!started) {
+            started = true;
+            observe([].concat(observables));
+        }
+        return _store;
+    };
+
+    var _store = {
+        /**
+         * @deprecated
+         * use .subscribe instead
+         */
+        stream: () => ({
+            onValue: (console.warn('this method will be removed in 0.3, use .subscribe instead'), executor)
+        }),
+        /**
+         *
+         */
+        subscribe: executor,
+        /**
+         *
+         */
+        unsubscribe: () => {
+            started = false;
+            subscriptions.forEach(runUnsubscribe);
+            return _store;
+        },
+        /**
+         *
+         */
+        plug: (...streams) => {
+            observables.push(...streams);
+            if (started) {
+                observe(streams);
             }
-        };
+            return _store;
+        }
+    };
 
-        const executor = next => {
-            next(model);
-            observers.push(next);
-            if (!started) {
-                started = true;
-                observe([].concat(observables));
-            }
-            return _store(model);
-        };
-
-        return {
-            /**
-             * @deprecated
-             * use .subscribe instead
-             */
-            stream: () => ({
-                onValue: (console.warn('this method will be removed in 0.3, use .subscribe instead'), executor)
-            }),
-            /**
-             *
-             */
-            subscribe: executor,
-            /**
-             *
-             */
-            unsubscribe: () => {
-                started = false;
-                subscriptions.forEach(runUnsubscribe);
-                return _store(model);
-            },
-            /**
-             *
-             */
-            plug: (...streams) => {
-                observables.push(...streams);
-                if (started) {
-                    observe(streams);
-                }
-                return _store(model);
-            }
-        };
-    }
-
-    return _store(init);
+    return _store;
 }
 
 module.exports = rstore;
