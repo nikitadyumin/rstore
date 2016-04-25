@@ -156,13 +156,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 	/**
 	 * Created by ndyumin on 23.12.2015.
 	 */
 
-	function runUnsub(subscription) {
+	function runUnsubscribe(subscription) {
 	    if (typeof subscription === 'function') {
 	        return subscription();
 	    }
@@ -185,51 +185,79 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return s$;
 	}
 
-	function rstore(init) {
-	    var plugged = [];
-
-	    function _store(model) {
-	        var executor = function executor(next) {
-	            next(model);
-	            var subscriptions = [];
-	            var reducers = [].concat(plugged);
-	            var clb = function clb(reducer) {
-	                return function (v) {
-	                    return next(model = reducer(model, v));
-	                };
-	            };
-	            while (reducers.length) {
-	                var s$ = wrapObservable(reducers.shift());
-	                var reduce = reducers.shift();
-	                subscriptions.push(s$.subscribe(clb(reduce)));
-	            }
-	            return function () {
-	                return subscriptions.forEach(runUnsub);
-	            };
+	function rstore(state) {
+	    var observables = [];
+	    var observers = [];
+	    var subscriptions = [];
+	    var started = false;
+	    var broadcast = function broadcast(state) {
+	        return observers.forEach(function (fn) {
+	            return fn(state);
+	        });
+	    };
+	    var clb = function clb(reducer) {
+	        return function (update) {
+	            return broadcast(state = reducer(state, update));
 	        };
+	    };
 
-	        return {
-	            /**
-	             * @deprecated
-	             * use .subscribe instead
-	             */
-	            stream: function stream() {
-	                return {
-	                    onValue: (console.warn('this method will be removed in 0.3, use .subscribe instead'), executor)
-	                };
-	            },
-	            /**
-	             *
-	             */
-	            subscribe: executor,
-	            plug: function plug() {
-	                plugged.push.apply(plugged, arguments);
-	                return _store(model);
+	    var observe = function observe(streams) {
+	        while (streams.length > 1) {
+	            var s$ = wrapObservable(streams.shift());
+	            var reduce = streams.shift();
+	            subscriptions.push(s$.subscribe(clb(reduce)));
+	        }
+	    };
+
+	    var executor = function executor(next) {
+	        next(state);
+	        observers.push(next);
+	        if (!started) {
+	            started = true;
+	            observe([].concat(observables));
+	        }
+	        return _store;
+	    };
+
+	    var _store = {
+	        /**
+	         * @deprecated
+	         * use .subscribe instead
+	         */
+	        stream: function stream() {
+	            return {
+	                onValue: (console.warn('this method will be removed in 0.3, use .subscribe instead'), executor)
+	            };
+	        },
+	        /**
+	         *
+	         */
+	        subscribe: executor,
+	        /**
+	         *
+	         */
+	        unsubscribe: function unsubscribe() {
+	            started = false;
+	            subscriptions.forEach(runUnsubscribe);
+	            return _store;
+	        },
+	        /**
+	         *
+	         */
+	        plug: function plug() {
+	            for (var _len = arguments.length, streams = Array(_len), _key = 0; _key < _len; _key++) {
+	                streams[_key] = arguments[_key];
 	            }
-	        };
-	    }
 
-	    return _store(init);
+	            observables.push.apply(observables, streams);
+	            if (started) {
+	                observe(streams);
+	            }
+	            return _store;
+	        }
+	    };
+
+	    return _store;
 	}
 
 	module.exports = rstore;
