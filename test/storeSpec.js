@@ -297,20 +297,108 @@ describe('store', () => {
         const eventName = 'click';
         const data = 'data';
         const mock = {
-            addEventListener: function(event, clb) {
+            addEventListener: function (event, clb) {
                 this.clb = clb;
             },
-            removeEventListener: function(event, clb) {
+            removeEventListener: function (event, clb) {
                 this.clb = null;
             },
-            fireEvent: function(data) {
+            fireEvent: function (data) {
                 this.clb(data);
             }
         };
         const obs = rstore.fromEvent(mock, eventName);
-        obs.subscribe(function(v) {
-           done(v === data ? null : new Error('wrong data'))
+        obs.subscribe(function (v) {
+            done(v === data ? null : new Error('wrong data'))
         });
         mock.fireEvent(data);
-    })
+    });
+
+    it("resubscribe (Bacon, hot)", done => {
+        const values = [1, 2, 3, 4];
+        const s0$ = Bacon.fromArray(values);
+
+        let i = 0;
+
+        function test(value) {
+            if (values.length + 2 === ++i) {
+                setTimeout(() => {
+                    done(value === 10 ? null : new Error('wrong value + ' + value));
+                }, 10);
+            }
+        }
+
+        const store = rstore.store(0)
+            .plug(s0$, (s, u) => s + u)
+            .subscribe(test);
+
+        store.unsubscribe();
+        store.subscribe(test);
+    });
+
+    it("resubscribe (Bacon, 2 hot)", done => {
+        const values = [1, 2, 3, 4];
+        const s0$ = Bacon.fromArray(values);
+        const s1$ = Bacon.fromArray(values);
+
+        let i = 0;
+
+        function test(value) {
+            if (values.length * 2 + 2 === ++i) {
+                setTimeout(() => {
+                    done(value === 20 ? null : new Error('wrong value + ' + value));
+                }, 10);
+            }
+        }
+
+        const store = rstore.store(0)
+            .plug(s0$, (s, u) => s + u)
+            .plug(s1$, (s, u) => s + u)
+            .subscribe(test);
+
+        store.unsubscribe();
+        store.subscribe(test);
+    });
+
+    it("resubscribe (Rx, 1 cold, 3 times)", done => {
+        const values = [1, 2, 3, 4];
+        const s0$ = Rx.Observable.from(values);
+
+        let i = 0;
+
+        function test(value) {
+            if (values.length * 3 + 3 === ++i) {
+                setTimeout(() => {
+                    done(value === 30 ? null : new Error('wrong value + ' + value));
+                }, 10);
+            }
+        }
+
+        const store = rstore.store(0)
+            .plug(s0$, (s, u) => s + u)
+            .subscribe(test);
+
+        store.unsubscribe();
+        store.subscribe(test);
+        store.unsubscribe();
+        store.subscribe(test);
+    });
+
+    it("plug later", done => {
+        let i = 0;
+        const values = [1, 2, 3, 4];
+        const s0$ = Bacon.fromArray(values);
+        const s1$ = Bacon.fromArray(values);
+        const store = rstore.store(0)
+            .plug(s0$, (s, u) => s + u)
+            .subscribe(test);
+
+        store.plug(s1$, (s, u) => s + u);
+
+        function test(v) {
+            if (++i === values.length * 2 + 1) {
+                done(v === 20 ? null : new Error(v));
+            }
+        }
+    });
 });

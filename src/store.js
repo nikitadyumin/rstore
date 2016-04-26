@@ -33,11 +33,10 @@ function rstore(state) {
     const broadcast = state => observers.forEach(fn => fn(state));
     const clb = reducer => update => broadcast(state = reducer(state, update));
 
-    const observe = streams => {
-        while (streams.length > 1) {
-            const s$ = wrapObservable(streams.shift());
-            const reduce = streams.shift();
-            subscriptions.push(s$.subscribe(clb(reduce)));
+    const observe = (s$, reduce, ...streams) => {
+        if (s$ && reduce) {
+            subscriptions.push(wrapObservable(s$).subscribe(clb(reduce)));
+            return observe(...streams);
         }
     };
 
@@ -46,7 +45,7 @@ function rstore(state) {
         observers.push(next);
         if (!started) {
             started = true;
-            observe([].concat(observables));
+            observe(...observables);
         }
         return _store;
     };
@@ -69,6 +68,8 @@ function rstore(state) {
         unsubscribe: () => {
             started = false;
             subscriptions.forEach(runUnsubscribe);
+            subscriptions.length = 0;
+            observers.length = 0;
             return _store;
         },
         /**
@@ -77,7 +78,7 @@ function rstore(state) {
         plug: (...streams) => {
             observables.push(...streams);
             if (started) {
-                observe(streams);
+                observe(...streams);
             }
             return _store;
         }

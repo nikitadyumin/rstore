@@ -201,11 +201,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    };
 
-	    var observe = function observe(streams) {
-	        while (streams.length > 1) {
-	            var s$ = wrapObservable(streams.shift());
-	            var reduce = streams.shift();
-	            subscriptions.push(s$.subscribe(clb(reduce)));
+	    var observe = function observe(s$, reduce) {
+	        for (var _len = arguments.length, streams = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+	            streams[_key - 2] = arguments[_key];
+	        }
+
+	        if (s$ && reduce) {
+	            subscriptions.push(wrapObservable(s$).subscribe(clb(reduce)));
+	            return observe.apply(undefined, streams);
 	        }
 	    };
 
@@ -214,7 +217,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        observers.push(next);
 	        if (!started) {
 	            started = true;
-	            observe([].concat(observables));
+	            observe.apply(undefined, observables);
 	        }
 	        return _store;
 	    };
@@ -239,19 +242,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        unsubscribe: function unsubscribe() {
 	            started = false;
 	            subscriptions.forEach(runUnsubscribe);
+	            subscriptions.length = 0;
+	            observers.length = 0;
 	            return _store;
 	        },
 	        /**
 	         *
 	         */
 	        plug: function plug() {
-	            for (var _len = arguments.length, streams = Array(_len), _key = 0; _key < _len; _key++) {
-	                streams[_key] = arguments[_key];
-	            }
-
-	            observables.push.apply(observables, streams);
+	            observables.push.apply(observables, arguments);
 	            if (started) {
-	                observe(streams);
+	                observe.apply(undefined, arguments);
 	            }
 	            return _store;
 	        }
