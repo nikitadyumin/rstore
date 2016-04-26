@@ -18,6 +18,8 @@
     "url": "git+https://github.com/nikitadyumin/rstore.git"
   },
   "keywords": [
+    "state",
+    "elm",
     "es6",
     "es2015",
     "reactive",
@@ -32,6 +34,7 @@
     "store",
     "model",
     "flux",
+    "redux",
     "frp"
   ],
   "author": "Nikita Dyumin",
