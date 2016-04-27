@@ -56,26 +56,38 @@ describe('lens', () => {
     });
 
     it('should provide a shortcut for setting an array field via .map', () => {
-        const o ={
-            a: [1,2,3,4,5]
+        const o = {
+            a: [1, 2, 3, 4, 5]
         };
         const aL = lens('a');
         const multL = aL.defineMapSetter(x => y => x * y);
-        expect(multL.set(o, 2).a).to.deep.equal([2,4,6,8,10]);
+        expect(multL.set(o, 2).a).to.deep.equal([2, 4, 6, 8, 10]);
 
         const tripleL = aL.defineMapSetter(() => x => 3 * x);
-        expect(tripleL.set(o).a).to.deep.equal([3,6,9,12,15]);
+        expect(tripleL.set(o).a).to.deep.equal([3, 6, 9, 12, 15]);
     });
 
     it('should provide a shortcut for setting an array field via .filter', () => {
-        const o ={
-            a: [1,2,3,4,5,6]
+        const o = {
+            a: [1, 2, 3, 4, 5, 6]
         };
         const aL = lens('a');
         const modL = aL.defineFilterSetter(x => y => y % x);
-        expect(modL.set(o, 2).a).to.deep.equal([1,3,5]);
+        expect(modL.set(o, 2).a).to.deep.equal([1, 3, 5]);
 
         const mod3L = aL.defineFilterSetter(() => x => x % 3);
-        expect(mod3L.set(o).a).to.deep.equal([1,2,4,5]);
+        expect(mod3L.set(o).a).to.deep.equal([1, 2, 4, 5]);
+    });
+
+    it('toggles values', () => {
+        const o = {
+            value: true
+        };
+        const o2 = {
+            value: false
+        };
+        const vL = lens('value');
+        expect(vL.toggle(o).value).to.equal(false);
+        expect(vL.toggle(o2).value).to.equal(true);
     });
 });
