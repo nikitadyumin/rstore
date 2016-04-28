@@ -1,35 +1,25 @@
-const Bacon = require('baconjs');
-const rstore = require('rstore');
+// prints out '0' once (the initial state, that does not change)
+store(0)
+    .subscribe(v => console.log(v));
 
-const actions = () => {
-    const bus = new Bacon.Bus();
-    return ({
-        stream: () => bus,
-        say: (x) => bus.push(x),
-        sayA: () => bus.push('A'),
-        sayB: () => bus.push('B')
-    });
+
+const one = {
+    subscribe: next => next(1)
 };
 
-const wordL = rstore.lens('word');
-const values= actions();
+// prints out '0' and then '1' (0 - initial state, 1 - a value from the 'one' stream)
+store(0)
+    .plug(one, (s, u) => u)
+    .subscribe(v => console.log(v));
 
-const store = rstore.store({
-    word: 'init'
-}).plug(values.stream(), wordL.set);
+const random$ = {
+    subscribe: (next) => {
+        const t = setInterval(()=> next(Math.random()), 300);
+        return () => clearInterval(t);
+    }
+};
 
-store.stream().onValue(
-    (value) => console.log(value)
-);
-
-// { word: 'init' }
-values.sayA();
-// { word: 'A' }
-values.sayB();
-// { word: 'B' }
-values.sayA();
-// { word: 'A' }
-values.say('custom');
-// { word: 'custom' }
-values.sayA();
-// { word: 'A' }
+// prints out 0 and then random values endlessly
+store(0)
+    .plug(random$, (s, u) => u)
+    .subscribe(v => console.log(v));

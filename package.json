@@ -10,7 +10,8 @@
   },
   "files": [
     "src",
-    "dist"
+    "dist",
+    "example.js"
   ],
   "tonicExampleFilename": "example.js",
   "repository": {
