@@ -9,3 +9,12 @@ export function fromEvent(node, eventName) {
         }
     };
 }
+
+export function interval(ms, ...values) {
+    return {
+        subscribe: observer => {
+            const interval = setInterval(observer, ms, ...values);
+            return () => clearInterval(interval);
+        }
+    };
+}

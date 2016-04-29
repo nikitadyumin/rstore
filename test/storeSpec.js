@@ -401,4 +401,18 @@ describe('store', () => {
             }
         }
     });
+
+    it('stops producting values on unsubscribe', done => {
+        let i = 0;
+        const subs = rstore.store(0)
+            .plug(rstore.interval(0), (s, u) => s + 1)
+            .subscribe(test);
+
+        function test(_v) {
+            if (++i === 10) {
+                subs.unsubscribe();
+                setTimeout(() => i > 10 ? done(new Error('not unsubscribed')) : done(), 5);
+            }
+        }
+    });
 });
