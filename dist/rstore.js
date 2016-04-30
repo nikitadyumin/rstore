@@ -70,6 +70,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 	    fromEvent: _utils.fromEvent,
+	    interval: _utils.interval,
+	    bus: _utils.bus,
 	    lens: _lens2.default,
 	    store: _store2.default
 	}; /**
@@ -267,12 +269,14 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 	exports.fromEvent = fromEvent;
+	exports.interval = interval;
+	exports.bus = bus;
 	/**
 	 * Created by ndyumin on 18.04.2016.
 	 */
@@ -283,6 +287,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return function () {
 	                return node.removeEventListener(eventName, observer);
 	            };
+	        }
+	    };
+	}
+
+	function interval(ms) {
+	    for (var _len = arguments.length, values = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	        values[_key - 1] = arguments[_key];
+	    }
+
+	    return {
+	        subscribe: function subscribe(observer) {
+	            var interval = setInterval.apply(undefined, [observer, ms].concat(values));
+	            return function () {
+	                return clearInterval(interval);
+	            };
+	        }
+	    };
+	}
+
+	function bus() {
+	    var _next = function next() {};
+	    return {
+	        subscribe: function subscribe(observer) {
+	            return _next = typeof observer === 'function' ? observer : _next;
+	        },
+	        next: function next(value) {
+	            return _next(value);
 	        }
 	    };
 	}

@@ -18,3 +18,11 @@ export function interval(ms, ...values) {
         }
     };
 }
+
+export function bus() {
+    let next = () => {};
+    return {
+        subscribe: observer => next = typeof observer === 'function' ? observer : next,
+        next: value => next(value)
+    };
+}
