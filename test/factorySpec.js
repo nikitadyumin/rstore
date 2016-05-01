@@ -22,4 +22,19 @@ describe('factories', () => {
         }).subscribe(noop);
         unsubscribe();
     });
+    it('has buses for imperative event pushing', (done)=> {
+        const bus = rstore.bus();
+        const values = [1,2,3,4];
+        function test(v) {
+            const expected = values.shift();
+            if (v !== expected) {
+                done(new Error(`incorrect value: expected ${expected}, got ${v}`));
+            }
+            if (values.length === 0) {
+                done();
+            }
+        }
+        bus.subscribe(test);
+        values.slice(0).forEach(bus.next);
+    });
 });
