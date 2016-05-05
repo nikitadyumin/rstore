@@ -1,3 +1,5 @@
+const store = require('rstore').store;
+
 // prints out '0' once (the initial state, that does not change)
 store(0)
     .subscribe(v => console.log(v));
