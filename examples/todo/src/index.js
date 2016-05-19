@@ -7,7 +7,7 @@ require('todomvc-app-css/index.css');
 
 const $ = require('jquery');
 const Bacon = require('baconjs');
-const rs = require('rstore');
+import { store, lens } from 'rstore';
 
 // UTIL
 
@@ -36,7 +36,7 @@ const taskRemove$ = itemClick$
 
 const filter = () => location.hash.substring(2);
 const filter$ = Bacon.fromEvent(window, 'hashchange')
-    .map(hash => filter())
+    .map(filter)
     .startWith(filter());
 
 // VIEW
@@ -76,7 +76,7 @@ const render = model => {
 
 // STORE
 
-const model = rs.store({
+const model = store({
     maxId: 1,
     filter: '',
     tasks: [
@@ -87,9 +87,9 @@ const model = rs.store({
 
 // DISPATCHERS
 
-const filterL = rs.lens('filter');
-const tasksL = rs.lens('tasks');
-const doneL = rs.lens('done');
+const filterL = lens('filter');
+const tasksL = lens('tasks');
+const doneL = lens('done');
 
 const removeByIdL = tasksL
     .defineFilterSetter(action => task => task.id !== action);
