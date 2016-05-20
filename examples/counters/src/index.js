@@ -1,7 +1,7 @@
 /**
  * Created by ndyumin on 19.05.2016.
  */
-import {store} from 'rstore';
+import {store, fromEvent} from 'rstore';
 import {h, diff, patch} from 'virtual-dom';
 const createElement = require('virtual-dom/create-element');
 
@@ -27,9 +27,16 @@ function address() {
     }
 }
 
+function arrayLens(index) {
+    return {
+        get: arr => arr[index],
+        set: (arr, value) => (arr[index] = value, arr)
+    };
+}
+
 const sum = (s, u) => s + u;
 
-const counter = (el, init) => {
+const counter = (el, model, lens) => {
 
     const address_ = address();
 
@@ -41,28 +48,27 @@ const counter = (el, init) => {
         ]);
     }
 
-    let tree = update(init);
+    let tree = update(0);
     let root = el.appendChild(createElement(tree));
 
     function render(data) {
-        const updated = update(data);
+        const updated = update(lens.get(data));
         const patches = diff(tree, updated);
         tree = updated;
         root = patch(root, patches);
     }
 
-    const store_ = store(init).plug(address_, sum);
-    store_.subscribe(render);
+    model.plug(address_, (s, u) => lens.set(s, lens.get(s) + u));
+    model.subscribe(render);
 
-    return store_;
+    return null;
 };
 
+const counters = store([0, 0]);
 
-const counter1 = counter(document.getElementById('c1'), 0);
-const counter2 = counter(document.getElementById('c2'), 0);
+counter(document.getElementById('c1'), counters, arrayLens(0));
+counter(document.getElementById('c2'), counters, arrayLens(1));
 
-const counters = store([0, 0])
-    .plug(counter1, (s, u) => (s[0] = u, s))
-    .plug(counter2, (s, u) => (s[1] = u, s));
+counters.plug(fromEvent(document.getElementById('reset'), 'click'), () => [0, 0]);
 
 counters.subscribe(xs => document.getElementById('result').textContent = xs.reduce(sum));
