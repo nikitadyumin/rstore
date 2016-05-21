@@ -1,6 +1,6 @@
 {
   "name": "rstore",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "a reactive state manager",
   "main": "./dist/rstore.js",
   "scripts": {
