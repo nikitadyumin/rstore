@@ -1,13 +1,22 @@
 /**
  * Created by ndyumin on 22.05.2016.
  */
+import Type from 'union-type';
 import {h} from 'virtual-dom';
-import {address} from './util';
+import {address, wrapAddress} from './util';
 import {
     model as counterModel,
     update as counterUpdate,
     view as counterView
 } from './counter';
+
+const T = () => true;
+
+const Action = Type({
+    TopCounter: [T],
+    BottomCounter: [T],
+    Reset: []
+});
 
 export const model = [
     counterModel,
@@ -16,32 +25,22 @@ export const model = [
 
 export function update(s, u) {
     let copy = s.slice();
-    switch (u.type) {
-        case 'reset':
-            copy = model;
-            break;
-        default:
-            copy[u.index] = counterUpdate(copy[u.index], u.value);
-            break;
-    }
-    return copy;
+    return Action.case({
+        Reset: () => model,
+        TopCounter: v => (copy[0] = counterUpdate(copy[0], v), copy),
+        BottomCounter: v => (copy[1] = counterUpdate(copy[1], v), copy)
+    }, u);
 }
 
-export function view(address_, data) {
-    const counter1updates = address();
-    const counter2updates = address();
-
-    counter1updates.subscribe(v => address_.send({index: 0, value: v}));
-    counter2updates.subscribe(v => address_.send({index: 1, value: v}));
-
+export function view(address_, model) {
     return h('div', [
-        counterView(counter1updates, data[0]),
-        counterView(counter2updates, data[1]),
+        counterView(wrapAddress(address_, Action.TopCounter), model[0]),
+        counterView(wrapAddress(address_, Action.BottomCounter), model[1]),
         h('div', [
             'total ',
-            data.reduce((x, y) => x + y)
+            model.reduce((x, y) => x + y)
         ]),
-        h('button', {onclick: address_.signal({type: 'reset'})}, [
+        h('button', {onclick: address_.signal(Action.Reset())}, [
             'reset'
         ])
     ]);

@@ -44,3 +44,14 @@ export function widget(el, init, update, view) {
             root = patch(root, patches);
         });
 }
+
+export function wrapAddress(address, type) {
+    return Object.assign({}, address, {
+        signal: function (msg) {
+            return address.signal(type(msg));
+        },
+        send: function (msg) {
+            return address.send(type(msg));
+        }
+    });
+}
