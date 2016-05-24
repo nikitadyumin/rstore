@@ -10,6 +10,20 @@ import {
     view as counterView
 } from './counter';
 
+const arrayLens = index => ({
+    set: (array, value) => {
+        const copy = array.slice();
+        copy[index] = value;
+        return copy;
+    },
+    get: (array) => {
+        return array[index];
+    }
+});
+
+const arrayAt0 = arrayLens(0);
+const arrayAt1 = arrayLens(1);
+
 const T = () => true;
 
 const Action = Type({
@@ -24,11 +38,10 @@ export const model = [
 ];
 
 export function update(s, u) {
-    let copy = s.slice();
     return Action.case({
         Reset: () => model,
-        TopCounter: v => (copy[0] = counterUpdate(copy[0], v), copy),
-        BottomCounter: v => (copy[1] = counterUpdate(copy[1], v), copy)
+        TopCounter: v => arrayAt0.set(s, counterUpdate(arrayAt0.get(s), v)),
+        BottomCounter: v => arrayAt1.set(s, counterUpdate(arrayAt1.get(s), v))
     }, u);
 }
 
