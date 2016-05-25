@@ -26,3 +26,26 @@ export function bus() {
         next: value => next(value)
     };
 }
+
+export function address() {
+    const subs = [];
+
+    function deliver(msg) {
+        subs.forEach(fn => fn(msg));
+    }
+
+    return {
+        send: deliver,
+        signal: function (msg) {
+            return function () {
+                deliver(msg)
+            }
+        },
+        subscribe: function (clb) {
+            subs.push(clb);
+            return function () {
+                subs.splice(subs.indexOf(clb), 1);
+            }
+        }
+    }
+}
