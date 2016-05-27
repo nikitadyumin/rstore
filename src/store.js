@@ -75,6 +75,11 @@ function rstore(state) {
         /**
          *
          */
+        toRx: (RxObject = Rx) =>
+            RxObject.Observable.create(o => executor(o.next.bind(o))),
+        /**
+         *
+         */
         plug: (...streams) => {
             observables.push(...streams);
             if (started) {

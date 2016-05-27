@@ -251,6 +251,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         *
 	         */
+	        toRx: function toRx() {
+	            var RxObject = arguments.length <= 0 || arguments[0] === undefined ? Rx : arguments[0];
+	            return RxObject.Observable.create(function (o) {
+	                return executor(o.next.bind(o));
+	            });
+	        },
+	        /**
+	         *
+	         */
 	        plug: function plug() {
 	            observables.push.apply(observables, arguments);
 	            if (started) {
@@ -277,6 +286,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.fromEvent = fromEvent;
 	exports.interval = interval;
 	exports.bus = bus;
+	exports.address = address;
 	/**
 	 * Created by ndyumin on 18.04.2016.
 	 */
@@ -314,6 +324,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 	        next: function next(value) {
 	            return _next(value);
+	        }
+	    };
+	}
+
+	function address() {
+	    var subs = [];
+
+	    function deliver(msg) {
+	        subs.forEach(function (fn) {
+	            return fn(msg);
+	        });
+	    }
+
+	    return {
+	        send: deliver,
+	        signal: function signal(msg) {
+	            return function () {
+	                deliver(msg);
+	            };
+	        },
+	        subscribe: function subscribe(clb) {
+	            subs.push(clb);
+	            return function () {
+	                subs.splice(subs.indexOf(clb), 1);
+	            };
 	        }
 	    };
 	}
