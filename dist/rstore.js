@@ -71,6 +71,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = {
 	    fromEvent: _utils.fromEvent,
 	    interval: _utils.interval,
+	    address: _utils.address,
 	    bus: _utils.bus,
 	    lens: _lens2.default,
 	    store: _store2.default
@@ -349,6 +350,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return function () {
 	                subs.splice(subs.indexOf(clb), 1);
 	            };
+	        },
+	        toRx: function toRx() {
+	            var _this = this;
+
+	            var Rx_ = arguments.length <= 0 || arguments[0] === undefined ? Rx : arguments[0];
+
+	            return Rx_.Observable.create(function (o) {
+	                return _this.subscribe(o.next.bind(o));
+	            });
 	        }
 	    };
 	}

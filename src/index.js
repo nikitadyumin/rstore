@@ -4,11 +4,12 @@
 
 import lens from './lens';
 import store from './store';
-import { fromEvent, interval, bus } from './utils';
+import { fromEvent, interval, bus, address } from './utils';
 
 module.exports = {
     fromEvent,
     interval,
+    address,
     bus,
     lens,
     store

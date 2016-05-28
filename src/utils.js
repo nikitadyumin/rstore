@@ -46,6 +46,11 @@ export function address() {
             return function () {
                 subs.splice(subs.indexOf(clb), 1);
             }
+        },
+        toRx: function(Rx_ = Rx) {
+            return Rx_.Observable.create(o => {
+                return this.subscribe(o.next.bind(o));
+            });
         }
     }
 }
