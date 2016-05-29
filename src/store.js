@@ -25,6 +25,11 @@ function wrapObservable(s$) {
     return s$;
 }
 
+const splice = (arr, o, c = 1) => {
+    const index = arr.indexOf(o);
+    return index !== -1 ? arr.splice(index, c) : [];
+};
+
 function rstore(state) {
     const observables = [];
     const observers = [];
@@ -33,9 +38,22 @@ function rstore(state) {
     const broadcast = state => observers.forEach(fn => fn(state));
     const clb = reducer => update => broadcast(state = reducer(state, update));
 
+    const unsubscribe = s$ => {
+        splice(observables, s$, 2);
+        const [subs] = subscriptions.filter(s => s.stream$ === s$);
+        if (typeof subs !== 'undefined') {
+            splice(subscriptions, subs);
+            runUnsubscribe(subs.unsubscribe);
+        }
+    };
+
     const observe = (s$, reduce, ...streams) => {
         if (s$ && reduce) {
-            subscriptions.push(wrapObservable(s$).subscribe(clb(reduce)));
+            const subscription = {
+                stream$: s$,
+                unsubscribe: wrapObservable(s$).subscribe(clb(reduce))
+            };
+            subscriptions.push(subscription);
             return observe(...streams);
         }
     };
@@ -67,7 +85,7 @@ function rstore(state) {
          */
         unsubscribe: () => {
             started = false;
-            subscriptions.forEach(runUnsubscribe);
+            subscriptions.forEach(s => runUnsubscribe(s.unsubscribe));
             subscriptions.length = 0;
             observers.length = 0;
             return _store;
@@ -85,6 +103,10 @@ function rstore(state) {
             if (started) {
                 observe(...streams);
             }
+            return _store;
+        },
+        unplug: (stream) => {
+            unsubscribe(stream);
             return _store;
         }
     };

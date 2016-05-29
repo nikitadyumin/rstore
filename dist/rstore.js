@@ -159,6 +159,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
+	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 	/**
@@ -188,6 +190,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return s$;
 	}
 
+	var splice = function splice(arr, o) {
+	    var c = arguments.length <= 2 || arguments[2] === undefined ? 1 : arguments[2];
+
+	    var index = arr.indexOf(o);
+	    return index !== -1 ? arr.splice(index, c) : [];
+	};
+
 	function rstore(state) {
 	    var observables = [];
 	    var observers = [];
@@ -204,13 +213,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    };
 
+	    var unsubscribe = function unsubscribe(s$) {
+	        splice(observables, s$, 2);
+
+	        var _subscriptions$filter = subscriptions.filter(function (s) {
+	            return s.stream$ === s$;
+	        });
+
+	        var _subscriptions$filter2 = _slicedToArray(_subscriptions$filter, 1);
+
+	        var subs = _subscriptions$filter2[0];
+
+	        if (typeof subs !== 'undefined') {
+	            splice(subscriptions, subs);
+	            runUnsubscribe(subs.unsubscribe);
+	        }
+	    };
+
 	    var observe = function observe(s$, reduce) {
 	        for (var _len = arguments.length, streams = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
 	            streams[_key - 2] = arguments[_key];
 	        }
 
 	        if (s$ && reduce) {
-	            subscriptions.push(wrapObservable(s$).subscribe(clb(reduce)));
+	            var subscription = {
+	                stream$: s$,
+	                unsubscribe: wrapObservable(s$).subscribe(clb(reduce))
+	            };
+	            subscriptions.push(subscription);
 	            return observe.apply(undefined, streams);
 	        }
 	    };
@@ -244,7 +274,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	         */
 	        unsubscribe: function unsubscribe() {
 	            started = false;
-	            subscriptions.forEach(runUnsubscribe);
+	            subscriptions.forEach(function (s) {
+	                return runUnsubscribe(s.unsubscribe);
+	            });
 	            subscriptions.length = 0;
 	            observers.length = 0;
 	            return _store;
@@ -266,6 +298,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (started) {
 	                observe.apply(undefined, arguments);
 	            }
+	            return _store;
+	        },
+	        unplug: function unplug(stream) {
+	            unsubscribe(stream);
 	            return _store;
 	        }
 	    };
