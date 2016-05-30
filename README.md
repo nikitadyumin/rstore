@@ -96,4 +96,5 @@ console.log( l.set(o1, 33) )
 // returns a new object like 'o2', but the field 'a' is set to '44' 
 // ({a: 44}), object 'o2' stays the same
 console.log( l.set(o2, 44) ) 
+```
 [more on lenses](lense.md)
