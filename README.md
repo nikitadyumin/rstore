@@ -6,7 +6,15 @@
 a straightforward, explicit, declarative and composable reactive store/model
 
 ## Introduction
-build complex UIs with trivial steps:
+
+The idea is to wrap a model object into an rstore object and make it impossible to modify it directly. 
+Instead, it receives updates from observables (currently RxJS4,5, Bacon.js and most.js are supported).
+This library provides built-in factories of observables:
+ - fromEvent(element: HTMLElement, EventName: String) => Observable of events
+ - interval(n: number, ...values) => Observable that emits values every n milliseconds
+ - address() => Observable that acts like an Event Bus (see [counters example](https://github.com/nikitadyumin/rstore/tree/master/examples/counters))
+
+Build complex UIs with trivial steps:
 
 1 ) describe a model (properties, initial state):
 
