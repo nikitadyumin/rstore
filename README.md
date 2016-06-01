@@ -7,14 +7,21 @@ a straightforward, explicit, declarative and composable reactive store/model
 
 ## Introduction
 
-The idea is to wrap a model object into an rstore object and make it impossible to modify it directly. 
-Instead, it receives updates from observables (currently RxJS4,5, Bacon.js and most.js are supported).
-This library provides built-in factories of observables:
- - fromEvent(element: HTMLElement, EventName: String) => Observable of events
- - interval(n: number, ...values) => Observable that emits values every n milliseconds
- - address() => Observable that acts like an Event Bus (see [counters example](https://github.com/nikitadyumin/rstore/tree/master/examples/counters))
+The idea behind rstore is to avoid direct state modifications. 
+Instead, a state is updated by notifications from observables (reactive streams).
+Observables (sources of updates) can be defined as:
+ - RxJS 4
+ - RxJS 5
+ - Bacon.js
+ - Most.js
+ - built-in factories:
+     * fromEvent(element: HTMLElement, EventName: String) => Observable of events
+     * interval(n: number, ...values) => Observable that emits values every n milliseconds
+     * address() => Observable that acts like an Event Bus (see [counters example](https://github.com/nikitadyumin/rstore/tree/master/examples/counters))
 
-Build complex UIs with trivial steps:
+A store created by rstore is an Observable and can be subscribed to - every state update get immediately delivered to all of the subscribers.
+
+### Example:
 
 1 ) describe a model (properties, initial state):
 
@@ -48,7 +55,8 @@ myStore.subscribe(model => console.log(model));
 
 ## Composability
 
-Stores themselves can be combined: 
+As stores are Observables, they can be used as sources of changes: 
+
 ```javascript
 // store 1 (counter from the previous example)
 const counter1 = store(0);
