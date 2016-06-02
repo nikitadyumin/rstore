@@ -169,14 +169,6 @@ describe('store', () => {
         stream1.forEach(v => setTimeout(() => s5$.push(v), 2, v));
     });
 
-
-    it('the old api works (.stream().onValue(clb))', (done) => {
-        const s0$ = new Bacon.Bus();
-        rstore.store(0)
-            .plug(s0$, (s, u) => s + u)
-            .stream().onValue(done);
-    });
-
     it('work with nested objects via lenses (e2e)', (done) => {
         const action$ = new Bacon.Bus();
         const action2$ = new Bacon.Bus();
@@ -215,7 +207,7 @@ describe('store', () => {
                 action2$, ayL.set
             );
 
-        store.stream().onValue(test);
+        store.subscribe(test);
 
         action$.push(10);
         action$.push(999);
@@ -262,12 +254,12 @@ describe('store', () => {
 
     it('works with rxjs and mostjs', (done) => {
         const values = [1, 2, 3, 4];
-        const s0$ = Bacon.fromArray(values);
-        const s1$ = Rx.Observable.from(values);
-        const s2$ = most.from(values);
+        const s0$ = Bacon.fromArray(values); // sync
+        const s1$ = Rx.Observable.from(values); // sync
+        const s2$ = most.from(values); // async
 
         let calls = 0;
-        const expectedCallsNumber = values.length * 3 + 1;
+        const expectedCallsNumber = values.length + 1;
 
         function test(value) {
             calls += 1;
@@ -321,7 +313,7 @@ describe('store', () => {
         let i = 0;
 
         function test(value) {
-            if (values.length + 2 === ++i) {
+            if (2 === ++i) {
                 setTimeout(() => {
                     done(value === 10 ? null : new Error('wrong value + ' + value));
                 }, 10);
@@ -344,7 +336,7 @@ describe('store', () => {
         let i = 0;
 
         function test(value) {
-            if (values.length * 2 + 2 === ++i) {
+            if (2 === ++i) {
                 setTimeout(() => {
                     done(value === 20 ? null : new Error('wrong value + ' + value));
                 }, 10);
@@ -367,9 +359,9 @@ describe('store', () => {
         let i = 0;
 
         function test(value) {
-            if (values.length * 3 + 3 === ++i) {
+            if (3 === ++i) {
                 setTimeout(() => {
-                    done(value === 30 ? null : new Error('wrong value + ' + value));
+                    done(value === 10 ? null : new Error('wrong value + ' + value));
                 }, 10);
             }
         }
@@ -396,7 +388,7 @@ describe('store', () => {
         store.plug(s1$, (s, u) => s + u);
 
         function test(v) {
-            if (++i === values.length * 2 + 1) {
+            if (++i === values.length  + 1) {
                 done(v === 20 ? null : new Error(v));
             }
         }

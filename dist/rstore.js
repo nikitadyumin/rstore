@@ -64,7 +64,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _store2 = _interopRequireDefault(_store);
 
-	var _utils = __webpack_require__(4);
+	var _utils = __webpack_require__(5);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -155,19 +155,80 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by ndyumin on 01.06.2016.
+	 */
+
+	var _require = __webpack_require__(4);
+
+	var wrap = _require.wrap;
+
+
+	function store(state) {
+	    var subscriptions = [];
+	    var observers = [];
+
+	    var broadcast = function broadcast(state) {
+	        return observers.forEach(function (fn) {
+	            return fn(state);
+	        });
+	    };
+	    var createStateUpdater = function createStateUpdater(reducer) {
+	        return function (update) {
+	            return broadcast(state = reducer(state, update));
+	        };
+	    };
+
+	    var _store = {
+	        subscribe: function subscribe(observer) {
+	            return observers.push(observer), observer(state);
+	        },
+	        plug: function plug(observable, reducer) {
+	            subscriptions.push({
+	                observable: observable,
+	                reducer: reducer,
+	                subscription: wrap(null, observable).subscribe(createStateUpdater(reducer))
+	            });
+	            return _store;
+	        },
+	        unplug: function unplug(observable, _reducer) {
+	            subscriptions.filter(function (s) {
+	                return typeof _reducer !== 'undefined' ? s.reducer === _reducer && s.observable === observable : s.observable === observable;
+	            }).forEach(function (s) {
+	                s.unsubscribe();
+	                subscriptions.splice(subscriptions.indexOf(s), 1);
+	            });
+	            return _store;
+	        },
+	        toRx: function toRx() {
+	            var RxObject = arguments.length <= 0 || arguments[0] === undefined ? Rx : arguments[0];
+	            return RxObject.Observable.create(function (o) {
+	                return _store.subscribe(o.next.bind(o));
+	            });
+	        }
+	    };
+	    return _store;
+	}
+
+	module.exports = store;
+
+/***/ },
+/* 4 */
 /***/ function(module, exports) {
 
 	'use strict';
 
-	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 	/**
-	 * Created by ndyumin on 23.12.2015.
+	 * Created by ndyumin on 01.06.2016.
 	 */
 
-	function runUnsubscribe(subscription) {
+	function autodetectUnsubscribe(subscription) {
 	    if (typeof subscription === 'function') {
 	        return subscription();
 	    }
@@ -180,139 +241,93 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return console.log('unknown subscription type', subscription);
 	}
 
-	function wrapObservable(s$) {
-	    if (typeof s$.observe === 'function') {
-	        return { subscribe: s$.observe.bind(s$) };
+	function autodetect(observable) {
+	    // most
+	    if (typeof observable.observe === 'function') {
+	        return {
+	            subscribe: function subscribe(next) {
+	                return observable.observe(next);
+	            },
+	            unsubscribe: function unsubscribe() {}
+	        };
 	    }
-	    if (typeof s$.onValue === 'function') {
-	        return { subscribe: s$.onValue.bind(s$) };
+	    // bacon, kefir
+	    if (typeof observable.onValue === 'function') {
+	        return {
+	            subscribe: function subscribe(next) {
+	                return observable.onValue(next);
+	            },
+	            unsubscribe: autodetectUnsubscribe
+	        };
 	    }
-	    return s$;
+	    // else
+	    return {
+	        subscribe: function subscribe(next) {
+	            return observable.subscribe(next);
+	        },
+	        unsubscribe: function unsubscribe(subscription) {
+	            return subscription.unsubscribe();
+	        }
+	    };
 	}
 
-	var splice = function splice(arr, o) {
-	    var c = arguments.length <= 2 || arguments[2] === undefined ? 1 : arguments[2];
+	function rxjs5(observable) {
+	    return {
+	        subscribe: function subscribe(next) {
+	            return observable.subscribe(next);
+	        },
+	        unsubscribe: function unsubscribe(subscription) {
+	            return subscription.unsubscribe();
+	        }
+	    };
+	}
 
-	    var index = arr.indexOf(o);
-	    return index !== -1 ? arr.splice(index, c) : [];
+	function rstore(observable) {
+	    return {
+	        subscribe: function subscribe(next) {
+	            return observable.subscribe(o);
+	        },
+	        unsubscribe: function unsubscribe(_unsubscribe) {
+	            return _unsubscribe();
+	        }
+	    };
+	}
+
+	function bacon(observable) {
+	    return {
+	        subscribe: function subscribe(next) {
+	            return observable.onValue(o);
+	        },
+	        unsubscribe: function unsubscribe(_unsubscribe2) {
+	            return _unsubscribe2();
+	        }
+	    };
+	}
+
+	function most(observable) {
+	    return {
+	        subscribe: function subscribe(next) {
+	            return observable.observe(o);
+	        },
+	        unsubscribe: function unsubscribe() {}
+	    };
+	}
+
+	var wrap = function wrap(type, observable) {
+	    return ({
+	        rxjs5: rxjs5,
+	        rstore: rstore,
+	        bacon: bacon,
+	        most: most
+	    }[type] || autodetect)(observable);
 	};
 
-	function rstore(state) {
-	    var observables = [];
-	    var observers = [];
-	    var subscriptions = [];
-	    var started = false;
-	    var broadcast = function broadcast(state) {
-	        return observers.forEach(function (fn) {
-	            return fn(state);
-	        });
-	    };
-	    var clb = function clb(reducer) {
-	        return function (update) {
-	            return broadcast(state = reducer(state, update));
-	        };
-	    };
-
-	    var unsubscribe = function unsubscribe(s$) {
-	        splice(observables, s$, 2);
-
-	        var _subscriptions$filter = subscriptions.filter(function (s) {
-	            return s.stream$ === s$;
-	        });
-
-	        var _subscriptions$filter2 = _slicedToArray(_subscriptions$filter, 1);
-
-	        var subs = _subscriptions$filter2[0];
-
-	        if (typeof subs !== 'undefined') {
-	            splice(subscriptions, subs);
-	            runUnsubscribe(subs.unsubscribe);
-	        }
-	    };
-
-	    var observe = function observe(s$, reduce) {
-	        for (var _len = arguments.length, streams = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
-	            streams[_key - 2] = arguments[_key];
-	        }
-
-	        if (s$ && reduce) {
-	            var subscription = {
-	                stream$: s$,
-	                unsubscribe: wrapObservable(s$).subscribe(clb(reduce))
-	            };
-	            subscriptions.push(subscription);
-	            return observe.apply(undefined, streams);
-	        }
-	    };
-
-	    var executor = function executor(next) {
-	        next(state);
-	        observers.push(next);
-	        if (!started) {
-	            started = true;
-	            observe.apply(undefined, observables);
-	        }
-	        return _store;
-	    };
-
-	    var _store = {
-	        /**
-	         * @deprecated
-	         * use .subscribe instead
-	         */
-	        stream: function stream() {
-	            return {
-	                onValue: (console.warn('this method will be removed in 0.3, use .subscribe instead'), executor)
-	            };
-	        },
-	        /**
-	         *
-	         */
-	        subscribe: executor,
-	        /**
-	         *
-	         */
-	        unsubscribe: function unsubscribe() {
-	            started = false;
-	            subscriptions.forEach(function (s) {
-	                return runUnsubscribe(s.unsubscribe);
-	            });
-	            subscriptions.length = 0;
-	            observers.length = 0;
-	            return _store;
-	        },
-	        /**
-	         *
-	         */
-	        toRx: function toRx() {
-	            var RxObject = arguments.length <= 0 || arguments[0] === undefined ? Rx : arguments[0];
-	            return RxObject.Observable.create(function (o) {
-	                return executor(o.next.bind(o));
-	            });
-	        },
-	        /**
-	         *
-	         */
-	        plug: function plug() {
-	            observables.push.apply(observables, arguments);
-	            if (started) {
-	                observe.apply(undefined, arguments);
-	            }
-	            return _store;
-	        },
-	        unplug: function unplug(stream) {
-	            unsubscribe(stream);
-	            return _store;
-	        }
-	    };
-
-	    return _store;
-	}
-
-	module.exports = rstore;
+	module.exports = {
+	    wrap: wrap
+	};
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
 	'use strict';

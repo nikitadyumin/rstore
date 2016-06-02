@@ -3,14 +3,18 @@
  */
 
 import lens from './lens';
-import store from './store';
+import store from './store/store';
 import { fromEvent, interval, bus, address } from './utils';
 
-module.exports = {
+const lenses = {
+    lens
+};
+
+const observableFactoryMethods = {
     fromEvent,
     interval,
-    address,
     bus,
-    lens,
-    store
+    address
 };
+
+module.exports = Object.assign({}, store, observableFactoryMethods, lenses);
