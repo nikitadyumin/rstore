@@ -11,6 +11,11 @@ function typedStore(plugObservableType, state) {
     const broadcast = state => observers.forEach(fn => fn(state));
     const createStateUpdater = reducer => update => broadcast(state = reducer(state, update));
 
+    function unsubAndRemove(updater) {
+        updater.wrappedObservable.unsubscribe(updater.subscription);
+        updaters.splice(updaters.indexOf(updater), 1);
+    }
+
     function observe(observable, reducer, ...observables) {
         if (observable && reducer) {
             const wrappedObservable = factory(plugObservableType, observable);
@@ -33,8 +38,7 @@ function typedStore(plugObservableType, state) {
             return store_;
         },
         unsubscribe: () => {
-            updaters.forEach(updater => updater.wrappedObservable.unsubscribe(updater.subscription));
-            updaters.length = 0;
+            updaters.forEach(unsubAndRemove);
             observers.length = 0;
             return store_;
         },
@@ -44,10 +48,7 @@ function typedStore(plugObservableType, state) {
                 .filter(updater => typeof _reducer !== 'undefined'
                     ? updater.reducer === _reducer && updater.observable === observable
                     : updater.observable === observable)
-                .forEach(updater => {
-                    updater.wrappedObservable.unsubscribe(updater.subscription);
-                    updaters.splice(updaters.indexOf(updater), 1);
-                });
+                .forEach(unsubAndRemove);
             return store_;
         },
         toRx: (RxObject = Rx) => RxObject.Observable.create(o => store_.subscribe(o.next.bind(o)))
