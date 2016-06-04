@@ -58,5 +58,7 @@ function typedStore(plugObservableType, state) {
 
 module.exports = {
     store: typedStore.bind(null, null),
+    storeBacon: typedStore.bind(null, 'bacon'),
+    storeMost: typedStore.bind(null, 'most'),
     storeRx: typedStore.bind(null, 'rxjs5')
 };
