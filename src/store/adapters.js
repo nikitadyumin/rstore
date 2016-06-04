@@ -45,21 +45,21 @@ function rxjs5(observable) {
 
 function rstore(observable) {
     return {
-        subscribe: next => observable.subscribe(o),
+        subscribe: next => observable.subscribe(next),
         unsubscribe: unsubscribe => unsubscribe()
     };
 }
 
 function bacon(observable) {
     return {
-        subscribe: next => observable.onValue(o),
+        subscribe: next => observable.onValue(next),
         unsubscribe: unsubscribe => unsubscribe()
     };
 }
 
 function most(observable) {
     return {
-        subscribe: next => observable.observe(o),
+        subscribe: next => observable.observe(next),
         unsubscribe: () => {}
     };
 }
