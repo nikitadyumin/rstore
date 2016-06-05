@@ -18,13 +18,26 @@ function typedStore(plugObservableType, state) {
 
     function observe(observable, reducer, ...observables) {
         if (observable && reducer) {
+            let synchronouslyCompleted = false;
             const wrappedObservable = factory(plugObservableType, observable);
-            updaters.push({
+            const updater = {
                 observable: observable,
                 reducer: reducer,
                 wrappedObservable: wrappedObservable,
-                subscription: wrappedObservable.subscribe(createStateUpdater(reducer))
-            });
+                subscription: wrappedObservable.subscribe({
+                    next: createStateUpdater(reducer),
+                    complete: () => {
+                        if (typeof  updater === 'undefined') {
+                            synchronouslyCompleted = true;
+                        } else {
+                            unsubAndRemove(updater);
+                        }
+                    }
+                })
+            };
+            if (!synchronouslyCompleted) {
+                updaters.push(updater);
+            }
             return observe(...observables);
         } else {
             return store_;
@@ -58,6 +71,7 @@ function typedStore(plugObservableType, state) {
 
 module.exports = {
     store: typedStore.bind(null, null),
+    storeR: typedStore.bind(null, 'rstore'),
     storeBacon: typedStore.bind(null, 'bacon'),
     storeMost: typedStore.bind(null, 'most'),
     storeRx: typedStore.bind(null, 'rxjs5')

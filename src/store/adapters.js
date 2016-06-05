@@ -1,6 +1,8 @@
 /**
  * Created by ndyumin on 01.06.2016.
  */
+const run = fn => fn();
+
 function autodetectUnsubscribe(subscription) {
     if (typeof subscription === 'function') {
         return subscription();
@@ -18,49 +20,62 @@ function autodetect(observable) {
     // most
     if (typeof observable.observe === 'function') {
         return {
-            subscribe: next => observable.observe(next),
-            unsubscribe: () => {}
+            subscribe: o => {
+                return observable
+                    .observe(o.next)
+                    .then(o.complete);
+                //.catch(o.error)
+            },
+            unsubscribe: () => {
+            }
         };
     }
     // bacon, kefir
     if (typeof observable.onValue === 'function') {
         return {
-            subscribe: next => observable.onValue(next),
+            subscribe: o => {
+                const subs = [
+                    observable.onValue(o.next),
+                    //observable.onError(o.error),
+                    observable.onEnd(o.complete)
+                ];
+                return () => subs.forEach(run);
+            },
             unsubscribe: autodetectUnsubscribe
         };
     }
-    // else
-    return  {
-        subscribe: next => observable.subscribe(next),
+    return {
+        subscribe: o => observable.subscribe(o),
         unsubscribe: autodetectUnsubscribe
     };
 }
 
 function rxjs5(observable) {
     return {
-        subscribe: next => observable.subscribe(next),
+        subscribe: o => observable.subscribe(o),
         unsubscribe: subscription => subscription.unsubscribe()
     };
 }
 
 function rstore(observable) {
     return {
-        subscribe: next => observable.subscribe(next),
+        subscribe: o => observable.subscribe(o.next),
         unsubscribe: unsubscribe => unsubscribe()
     };
 }
 
 function bacon(observable) {
     return {
-        subscribe: next => observable.onValue(next),
+        subscribe: o => observable.onValue(o.next),
         unsubscribe: unsubscribe => unsubscribe()
     };
 }
 
 function most(observable) {
     return {
-        subscribe: next => observable.observe(next),
-        unsubscribe: () => {}
+        subscribe: o => observable.observe(o.next),
+        unsubscribe: () => {
+        }
     };
 }
 

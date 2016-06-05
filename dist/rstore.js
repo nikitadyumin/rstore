@@ -68,16 +68,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	module.exports = {
-	    fromEvent: _utils.fromEvent,
-	    interval: _utils.interval,
-	    address: _utils.address,
-	    bus: _utils.bus,
-	    lens: _lens2.default,
-	    store: _store2.default
+	var lenses = {
+	    lens: _lens2.default
 	}; /**
 	    * Created by ndyumin on 23.12.2015.
 	    */
+
+	var observableFactoryMethods = {
+	    fromEvent: _utils.fromEvent,
+	    interval: _utils.interval,
+	    bus: _utils.bus,
+	    address: _utils.address
+	};
+
+	module.exports = Object.assign({}, _store2.default, observableFactoryMethods, lenses);
 
 /***/ },
 /* 1 */
@@ -159,17 +163,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 	/**
 	 * Created by ndyumin on 01.06.2016.
 	 */
 
 	var _require = __webpack_require__(4);
 
-	var wrap = _require.wrap;
+	var factory = _require.factory;
 
 
-	function store(state) {
-	    var subscriptions = [];
+	function typedStore(plugObservableType, state) {
+	    var updaters = [];
 	    var observers = [];
 
 	    var broadcast = function broadcast(state) {
@@ -183,38 +191,89 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    };
 
-	    var _store = {
+	    function unsubAndRemove(updater) {
+	        updater.wrappedObservable.unsubscribe(updater.subscription);
+	        updaters.splice(updaters.indexOf(updater), 1);
+	    }
+
+	    function observe(observable, reducer) {
+	        var _arguments = arguments;
+
+	        if (observable && reducer) {
+	            var _len, observables, _key;
+
+	            var _ret = function () {
+	                var synchronouslyCompleted = false;
+	                var wrappedObservable = factory(plugObservableType, observable);
+	                var updater = {
+	                    observable: observable,
+	                    reducer: reducer,
+	                    wrappedObservable: wrappedObservable,
+	                    subscription: wrappedObservable.subscribe({
+	                        next: createStateUpdater(reducer),
+	                        complete: function complete() {
+	                            if (typeof updater === 'undefined') {
+	                                synchronouslyCompleted = true;
+	                            } else {
+	                                unsubAndRemove(updater);
+	                            }
+	                        }
+	                    })
+	                };
+	                if (!synchronouslyCompleted) {
+	                    updaters.push(updater);
+	                }
+
+	                for (_len = _arguments.length, observables = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+	                    observables[_key - 2] = _arguments[_key];
+	                }
+
+	                return {
+	                    v: observe.apply(undefined, _toConsumableArray(observables))
+	                };
+	            }();
+
+	            if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+	        } else {
+	            return store_;
+	        }
+	    }
+
+	    var store_ = {
 	        subscribe: function subscribe(observer) {
-	            return observers.push(observer), observer(state);
+	            observers.push(observer);
+	            observer(state);
+	            return store_;
 	        },
-	        plug: function plug(observable, reducer) {
-	            subscriptions.push({
-	                observable: observable,
-	                reducer: reducer,
-	                subscription: wrap(null, observable).subscribe(createStateUpdater(reducer))
-	            });
-	            return _store;
+	        unsubscribe: function unsubscribe() {
+	            updaters.forEach(unsubAndRemove);
+	            observers.length = 0;
+	            return store_;
 	        },
+	        plug: observe,
 	        unplug: function unplug(observable, _reducer) {
-	            subscriptions.filter(function (s) {
-	                return typeof _reducer !== 'undefined' ? s.reducer === _reducer && s.observable === observable : s.observable === observable;
-	            }).forEach(function (s) {
-	                s.unsubscribe();
-	                subscriptions.splice(subscriptions.indexOf(s), 1);
-	            });
-	            return _store;
+	            updaters.filter(function (updater) {
+	                return typeof _reducer !== 'undefined' ? updater.reducer === _reducer && updater.observable === observable : updater.observable === observable;
+	            }).forEach(unsubAndRemove);
+	            return store_;
 	        },
 	        toRx: function toRx() {
 	            var RxObject = arguments.length <= 0 || arguments[0] === undefined ? Rx : arguments[0];
 	            return RxObject.Observable.create(function (o) {
-	                return _store.subscribe(o.next.bind(o));
+	                return store_.subscribe(o.next.bind(o));
 	            });
 	        }
 	    };
-	    return _store;
+	    return store_;
 	}
 
-	module.exports = store;
+	module.exports = {
+	    store: typedStore.bind(null, null),
+	    storeR: typedStore.bind(null, 'rstore'),
+	    storeBacon: typedStore.bind(null, 'bacon'),
+	    storeMost: typedStore.bind(null, 'most'),
+	    storeRx: typedStore.bind(null, 'rxjs5')
+	};
 
 /***/ },
 /* 4 */
@@ -227,6 +286,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Created by ndyumin on 01.06.2016.
 	 */
+	var run = function run(fn) {
+	    return fn();
+	};
 
 	function autodetectUnsubscribe(subscription) {
 	    if (typeof subscription === 'function') {
@@ -245,8 +307,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // most
 	    if (typeof observable.observe === 'function') {
 	        return {
-	            subscribe: function subscribe(next) {
-	                return observable.observe(next);
+	            subscribe: function subscribe(o) {
+	                return observable.observe(o.next).then(o.complete);
+	                //.catch(o.error)
 	            },
 	            unsubscribe: function unsubscribe() {}
 	        };
@@ -254,27 +317,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // bacon, kefir
 	    if (typeof observable.onValue === 'function') {
 	        return {
-	            subscribe: function subscribe(next) {
-	                return observable.onValue(next);
+	            subscribe: function subscribe(o) {
+	                var subs = [observable.onValue(o.next),
+	                //observable.onError(o.error),
+	                observable.onEnd(o.complete)];
+	                return function () {
+	                    return subs.forEach(run);
+	                };
 	            },
 	            unsubscribe: autodetectUnsubscribe
 	        };
 	    }
-	    // else
 	    return {
-	        subscribe: function subscribe(next) {
-	            return observable.subscribe(next);
+	        subscribe: function subscribe(o) {
+	            return observable.subscribe(o);
 	        },
-	        unsubscribe: function unsubscribe(subscription) {
-	            return subscription.unsubscribe();
-	        }
+	        unsubscribe: autodetectUnsubscribe
 	    };
 	}
 
 	function rxjs5(observable) {
 	    return {
-	        subscribe: function subscribe(next) {
-	            return observable.subscribe(next);
+	        subscribe: function subscribe(o) {
+	            return observable.subscribe(o);
 	        },
 	        unsubscribe: function unsubscribe(subscription) {
 	            return subscription.unsubscribe();
@@ -284,8 +349,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function rstore(observable) {
 	    return {
-	        subscribe: function subscribe(next) {
-	            return observable.subscribe(o);
+	        subscribe: function subscribe(o) {
+	            return observable.subscribe(o.next);
 	        },
 	        unsubscribe: function unsubscribe(_unsubscribe) {
 	            return _unsubscribe();
@@ -295,8 +360,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function bacon(observable) {
 	    return {
-	        subscribe: function subscribe(next) {
-	            return observable.onValue(o);
+	        subscribe: function subscribe(o) {
+	            return observable.onValue(o.next);
 	        },
 	        unsubscribe: function unsubscribe(_unsubscribe2) {
 	            return _unsubscribe2();
@@ -306,14 +371,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function most(observable) {
 	    return {
-	        subscribe: function subscribe(next) {
-	            return observable.observe(o);
+	        subscribe: function subscribe(o) {
+	            return observable.observe(o.next);
 	        },
 	        unsubscribe: function unsubscribe() {}
 	    };
 	}
 
-	var wrap = function wrap(type, observable) {
+	var factory = function factory(type, observable) {
 	    return ({
 	        rxjs5: rxjs5,
 	        rstore: rstore,
@@ -323,7 +388,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	module.exports = {
-	    wrap: wrap
+	    factory: factory
 	};
 
 /***/ },
