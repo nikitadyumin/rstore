@@ -1,6 +1,7 @@
 /**
  * Created by ndyumin on 01.06.2016.
  */
+const {signature} = require('./constants');
 const run = fn => fn();
 
 function autodetectUnsubscribe(subscription) {
@@ -17,18 +18,13 @@ function autodetectUnsubscribe(subscription) {
 }
 
 function autodetect(observable) {
+    //self
+    if (observable.$$signature === signature) {
+        return rstore(observable);
+    }
     // most
     if (typeof observable.observe === 'function') {
-        return {
-            subscribe: o => {
-                return observable
-                    .observe(o.next)
-                    .then(o.complete);
-                //.catch(o.error)
-            },
-            unsubscribe: () => {
-            }
-        };
+        return most(observable);
     }
     // bacon, kefir
     if (typeof observable.onValue === 'function') {

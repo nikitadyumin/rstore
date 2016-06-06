@@ -3,6 +3,7 @@
  */
 
 const {factory} = require('./adapters');
+const {signature} = require('./constants');
 
 function typedStore(plugObservableType, state) {
     const updaters = [];
@@ -45,6 +46,7 @@ function typedStore(plugObservableType, state) {
     }
 
     var store_ = {
+        $$signature: signature,
         subscribe: observer => {
             observers.push(observer);
             observer(state);

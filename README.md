@@ -10,7 +10,6 @@ a straightforward, explicit, declarative and composable reactive store/model
 The idea behind rstore is to avoid direct state modifications. 
 Instead, a state is updated by notifications from observables (reactive streams).
 Observables (sources of updates) can be defined as:
- - RxJS 4
  - RxJS 5
  - Bacon.js
  - Most.js

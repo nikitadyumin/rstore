@@ -64,7 +64,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _store2 = _interopRequireDefault(_store);
 
-	var _utils = __webpack_require__(5);
+	var _utils = __webpack_require__(6);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -175,6 +175,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var factory = _require.factory;
 
+	var _require2 = __webpack_require__(5);
+
+	var signature = _require2.signature;
+
 
 	function typedStore(plugObservableType, state) {
 	    var updaters = [];
@@ -240,6 +244,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    var store_ = {
+	        $$signature: signature,
 	        subscribe: function subscribe(observer) {
 	            observers.push(observer);
 	            observer(state);
@@ -277,7 +282,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -286,6 +291,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Created by ndyumin on 01.06.2016.
 	 */
+
+	var _require = __webpack_require__(5);
+
+	var signature = _require.signature;
+
 	var run = function run(fn) {
 	    return fn();
 	};
@@ -304,15 +314,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function autodetect(observable) {
+	    //self
+	    if (observable.$$signature === signature) {
+	        return rstore(observable);
+	    }
 	    // most
 	    if (typeof observable.observe === 'function') {
-	        return {
-	            subscribe: function subscribe(o) {
-	                return observable.observe(o.next).then(o.complete);
-	                //.catch(o.error)
-	            },
-	            unsubscribe: function unsubscribe() {}
-	        };
+	        return most(observable);
 	    }
 	    // bacon, kefir
 	    if (typeof observable.onValue === 'function') {
@@ -393,6 +401,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 5 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	/**
+	 * Created by ndyumin on 06.06.2016.
+	 */
+	module.exports = {
+	  signature: Symbol('rstore')
+	};
+
+/***/ },
+/* 6 */
 /***/ function(module, exports) {
 
 	'use strict';
