@@ -300,8 +300,8 @@ describe('store', () => {
             }
         };
         const obs = rstore.fromEvent(mock, eventName);
-        obs.subscribe(function (v) {
-            done(v === data ? null : new Error('wrong data'))
+        obs.subscribe({
+            next: v => done(v === data ? null : new Error('wrong data'))
         });
         mock.fireEvent(data);
     });
@@ -396,8 +396,8 @@ describe('store', () => {
 
     it('stops producting values on unsubscribe', done => {
         let i = 0;
-        const subs = rstore.storeR(0)
-            .plug(rstore.interval(0), (s, u) => s + 1)
+        const subs = rstore.store(0)
+            .plug(rstore.interval(1), (s, u) => s + 1)
             .subscribe(test);
 
         function test(_v) {

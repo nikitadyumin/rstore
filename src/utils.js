@@ -4,7 +4,7 @@
 export function fromEvent(node, eventName) {
     return {
         subscribe: observer => {
-            node.addEventListener(eventName, observer);
+            node.addEventListener(eventName, observer.next);
             return () => node.removeEventListener(eventName, observer);
         }
     };
@@ -13,17 +13,9 @@ export function fromEvent(node, eventName) {
 export function interval(ms, ...values) {
     return {
         subscribe: observer => {
-            const interval = setInterval(observer, ms, ...values);
+            const interval = setInterval(observer.next, ms, ...values);
             return () => clearInterval(interval);
         }
-    };
-}
-
-export function bus() {
-    let next = () => {};
-    return {
-        subscribe: observer => next = typeof observer === 'function' ? observer : next,
-        next: value => next(value)
     };
 }
 
@@ -31,7 +23,7 @@ export function address() {
     const subs = [];
 
     function deliver(msg) {
-        subs.forEach(fn => fn(msg));
+        subs.forEach(o => o.next(msg));
     }
 
     return {

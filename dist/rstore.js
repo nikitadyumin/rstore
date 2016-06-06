@@ -408,22 +408,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Created by ndyumin on 06.06.2016.
 	 */
+
+	var symbol = typeof Symbol !== 'undefined' ? Symbol : function (name) {
+	  return { name: name };
+	};
+
 	module.exports = {
-	  signature: Symbol('rstore')
+	  signature: symbol('rstore')
 	};
 
 /***/ },
 /* 6 */
 /***/ function(module, exports) {
 
-	'use strict';
+	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 	exports.fromEvent = fromEvent;
 	exports.interval = interval;
-	exports.bus = bus;
 	exports.address = address;
 	/**
 	 * Created by ndyumin on 18.04.2016.
@@ -431,7 +435,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function fromEvent(node, eventName) {
 	    return {
 	        subscribe: function subscribe(observer) {
-	            node.addEventListener(eventName, observer);
+	            node.addEventListener(eventName, observer.next);
 	            return function () {
 	                return node.removeEventListener(eventName, observer);
 	            };
@@ -446,22 +450,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return {
 	        subscribe: function subscribe(observer) {
-	            var interval = setInterval.apply(undefined, [observer, ms].concat(values));
+	            var interval = setInterval.apply(undefined, [observer.next, ms].concat(values));
 	            return function () {
 	                return clearInterval(interval);
 	            };
-	        }
-	    };
-	}
-
-	function bus() {
-	    var _next = function next() {};
-	    return {
-	        subscribe: function subscribe(observer) {
-	            return _next = typeof observer === 'function' ? observer : _next;
-	        },
-	        next: function next(value) {
-	            return _next(value);
 	        }
 	    };
 	}
@@ -470,8 +462,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var subs = [];
 
 	    function deliver(msg) {
-	        subs.forEach(function (fn) {
-	            return fn(msg);
+	        subs.forEach(function (o) {
+	            return o.next(msg);
 	        });
 	    }
 
