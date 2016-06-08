@@ -72,8 +72,8 @@ store(2)
   .map(x => x * 2)
   .subscribe(v => console.log(v)); // 4
 ```
-Redux
-###reuse reducers###
+###Redux###
+Reducers can be reused
 ```javascript
 const observableOfChanges = Rx.Observable.from([
       {type: 'INCREMENT'},
@@ -97,7 +97,8 @@ store(0)
   .plug(observableOfChanges, reduxReducer)
   .subscribe(state => console.log(state)); // 2
 ```
-###use redux store as a source of updates###
+
+Redux store as a source of updates
 ```javascript
 
 const changes = [
