@@ -52,6 +52,83 @@ myStore.subscribe(model => console.log(model));
 
 [See more examples](examples/examples.md)
 
+
+## Interoperability
+###RxJS5###
+Observables are sources of changes
+```javascript
+store({
+    c1 : 0,
+    c2 : 0
+}).plug(
+    Rx.Observable.of(1), (s, u) => Object.assign({}, s, {c1: u}),
+    Rx.Observable.of(2), (s, u) => Object.assign({}, s, {c2: u})
+).subscribe(model => console.log(model.c1 + model.c2));
+```
+A store can be converted to an observable
+```
+store(2)
+  .toRx(Rx) // Rx object, optional if Rx is global
+  .map(x => x * 2)
+  .subscribe(v => console.log(v)); // 4
+```
+Redux
+###reuse reducers###
+```javascript
+const observableOfChanges = Rx.Observable.from([
+      {type: 'INCREMENT'},
+      {type: 'INCREMENT'},
+      {type: 'DECREMENT'},
+      {type: 'INCREMENT'},
+]);
+
+const reduxReducer = (state, action) => {
+      switch (action.type) {
+        case 'INCREMENT':
+          return state + 1
+        case 'DECREMENT':
+          return state - 1
+        default:
+          return state;
+      }
+};
+
+store(0)
+  .plug(observableOfChanges, reduxReducer)
+  .subscribe(state => console.log(state)); // 2
+```
+###use redux store as a source of updates###
+```javascript
+
+const changes = [
+    {type: 'INCREMENT'},
+    {type: 'INCREMENT'},
+    {type: 'DECREMENT'},
+    {type: 'INCREMENT'}
+];
+
+function reduxReducer (state = 0, action) {
+    switch (action.type) {
+        case 'INCREMENT':
+            return state + 1;
+        case 'DECREMENT':
+            return state - 1;
+        default:
+            return state;
+    }
+}
+
+const reduxStore = Redux.createStore(reduxReducer);
+
+changes.forEach(m => reduxStore.dispatch(m));
+
+rstore.store(0)
+    .plug(reduxStore[Symbol.observable](), (s, u) => u)
+    .subscribe(state => console.log(state)); // 4
+
+changes.forEach(m => reduxStore.dispatch(m));
+```
+
 ## Composability
 
 As stores are Observables, they can be used as sources of changes: 
