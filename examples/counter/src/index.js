@@ -1,5 +1,6 @@
 'use strict';
-
+const $ = require('jquery');
+const bacon = require('baconjs');
 const rstore = require('rstore').store;
 
 const addClick$ = $('#add').asEventStream('click').map(()=>1);
