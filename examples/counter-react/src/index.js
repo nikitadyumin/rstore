@@ -1,6 +1,6 @@
 import React from 'react';
 import { render  as renderDom } from 'react-dom';
-import { store, bus } from 'rstore';
+import { store, address } from 'rstore';
 
 const Counter = ({model, onAdd, onSub}) => (
     <div>
@@ -10,11 +10,11 @@ const Counter = ({model, onAdd, onSub}) => (
     </div>
 );
 
-const updates$ = bus();
+const updates$ = address();
 
 const render = (model) => {
     renderDom(
-        <Counter model={model} onAdd={() => updates$.next(1)} onSub={() => updates$.next(-1)}/>,
+        <Counter model={model} onAdd={updates$.signal(1)} onSub={updates$.signal(-1)}/>,
         document.getElementById('root')
     )
 };
