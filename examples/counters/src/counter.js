@@ -3,7 +3,7 @@
  */
 
 import {h} from 'virtual-dom';
-import {address} from './util';
+import {address} from 'rstore';
 import Type from 'union-type';
 
 const Action = Type({

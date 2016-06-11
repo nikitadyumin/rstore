@@ -3,7 +3,8 @@
  */
 import Type from 'union-type';
 import {h} from 'virtual-dom';
-import {address, wrapAddress} from './util';
+import {address} from 'rstore';
+import {wrapAddress} from './util';
 import {
     model as counterModel,
     update as counterUpdate,
