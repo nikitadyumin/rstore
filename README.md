@@ -7,18 +7,57 @@ a straightforward, explicit, declarative and composable reactive store/model
 
 ## Introduction
 
-The idea behind rstore is to avoid direct state modifications. 
-Instead, a state is updated by notifications from observables (reactive streams).
-Observables (sources of updates) can be defined as:
- - RxJS 5
- - Bacon.js
- - Most.js
- - built-in factories:
-     * fromEvent(element: HTMLElement, EventName: String) => Observable of events
-     * interval(n: number, ...values) => Observable that emits values every n milliseconds
-     * address() => Observable that acts like an Event Bus (see [counters example](https://github.com/nikitadyumin/rstore/tree/master/examples/counters))
+RStore is an observable (reactive) model.
 
-A store created by rstore is an Observable and can be subscribed to - every state update get immediately delivered to all of the subscribers.
+### Reactive?
+| Active | Reactive |
+|---|---|
+| direct query at some point in time | a subscription to all updates |
+| console.log(state.getValue()) | state.subscribe(value => console.log(value)) |
+
+In the reactive world of observables you don't have to think if something has happened by the time something else happens.
+So you can concentrate on a single thing - defining a way the changes combine and map to the result.
+
+### What are the benefits?
+- a state is defined in one place 
+```
+store(0)
+```
+- every observer immediately receives a notification on a state update (including the initial state) 
+```
+store(0)
+  .subscribe(value => console.log(value))
+```
+- the state can only be updated by other observables, so it changes whenever source stream produce updates
+- the way updates modify the state is defined in terms of (widely adopted redux) reducers (see the interoperability section)
+```
+store(0)
+  .plug(Rx.Observable.of(1), (x, y) => x + y)
+  .subscribe(value => console.log(value))
+```
+- observables (sources of updates) can be defined in many ways
+    - RxJS 5
+    - Bacon.js
+    - Most.js
+    - built-in factories:
+        - fromEvent(element: HTMLElement, EventName: String) => Observable of events
+        - interval(n: number, ...values) => Observable that emits values every n milliseconds
+        - address() => Observable that acts like an Event Bus (see [counters example](https://github.com/nikitadyumin/rstore/tree/master/examples/counters))
+    - custom observer that implements [observable interface](https://github.com/zenparsing/es-observable)
+- RStore stores can be combined
+```
+const s1 = store(1);
+const s2 = store(2);
+s1.plug(s2, (x, y) => x + y)
+  .subscribe(value => console.log(value)); // 3
+```
+- RStore stores can be converted to RxJS Observables
+```
+store(1)
+  .toRx()
+  .map(x => x* 2)
+  .subscribe(state => console.log(state));
+```
 
 ### Example:
 
@@ -29,7 +68,7 @@ const {store} = require('rstore');
 const myStore = store(0);
 ```
 
-2 ) define sources of changes (using `fromEvent` helper or Rx, Bacon, most streams, see [defining inputs](define_changes.md))
+2 ) define sources of changes (using `fromEvent` helper or Rx, Bacon, Most.js streams, see [defining inputs](define_changes.md))
 
 ```javascript
 const inc$ = fromEvent(document.getElementById('inc'), 'click');
