@@ -91,7 +91,38 @@ myStore.subscribe(model => console.log(model));
 
 [See more examples](examples/examples.md)
 
+## API
+### Creating stores
+As RStore supports multiple kinds of observables (APIs), it exports 5 store constructors:
+ |constructor|description|
+ |---|---|
+ | store | general, with an autodetect of the observable API|
+ | storeR | RStore observables |
+ | storeBacon | [Bacon.js](https://baconjs.github.io/)|
+ | storeMost | [Most.js](https://github.com/cujojs/most)|
+ | storeRx | [RxJS5](https://github.com/ReactiveX/rxjs)|
 
+A constructor is a function that expects a single argument - an initial model value:
+It could be a primitive value
+```javascript
+store(0);
+```
+or an object
+```javascript
+store({
+    todos: []
+});
+```
+
+### RStore methods
+
+ |method|description|note|
+ |---|---|---|
+ |`.plug(oObservable, fnReducer)`| subscribes RStore to the `oObservable` and for every value calls the `fnReducer` ||
+ |`.unplug(oObservable, fnReducer)`| given `oObservable` and optionally `fnReducer` unsubscribes RStore from an external observer||
+ |`.subscribe(fnObserver)`| subscribes to RStore - calls `fnObserver` for every state update, including an initial value||
+ |`.toRx(Rx)`|converts a store to an Rx Observable||
+ 
 ## Interoperability
 ###RxJS5###
 Observables are sources of changes
