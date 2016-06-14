@@ -118,10 +118,10 @@ store({
 
  |method|description|note|
  |---|---|---|
- |`.plug(oObservable, fnReducer)`| subscribes RStore to the `oObservable` and for every value calls the `fnReducer` ||
- |`.unplug(oObservable, fnReducer)`| given `oObservable` and optionally `fnReducer` unsubscribes RStore from an external observer||
- |`.subscribe(fnObserver)`| subscribes to RStore - calls `fnObserver` for every state update, including an initial value||
- |`.toRx(Rx)`|converts a store to an Rx Observable||
+ |".plug(oObservable, fnReducer)"| subscribes RStore to the "oObservable" and for every value calls the "fnReducer" ||
+ |".unplug(oObservable, fnReducer)"| given "oObservable" and optionally "fnReducer" unsubscribes RStore from an external observer||
+ |".subscribe(fnObserver)"| subscribes to RStore - calls "fnObserver" for every state update, including an initial value||
+ |".toRx(Rx)"|converts a store to an Rx Observable||
  
 ## Interoperability
 ###RxJS5###
