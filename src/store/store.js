@@ -52,10 +52,14 @@ function typedStore(plugObservableType, state) {
             observer(state);
             return store_;
         },
-        unsubscribe: () => {
+        reset: () => {
             updaters.forEach(unsubAndRemove);
             observers.length = 0;
             return store_;
+        },
+        unsubscribe: () => {
+            console.warn('this will be removed in 0.4, use `.reset()` instead');
+            store_.reset();
         },
         plug: observe,
         unplug: (observable, _reducer) => {

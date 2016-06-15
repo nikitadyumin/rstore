@@ -122,6 +122,7 @@ store({
 | `.plug(oObservable, fnReducer)` |  subscribes RStore to the `oObservable` and for every value calls the `fnReducer` |
 | `.unplug(oObservable, fnReducer)` | given `oObservable` and optionally `fnReducer` unsubscribes RStore from an external observer |
 | `.subscribe(fnObserver)` | subscribes to RStore - calls `fnObserver` for every state update, including an initial value |
+| `.reset()` | unsubscribes everything|
 | `.toRx(Rx)` | converts a store to an Rx Observable |
  
 ## Interoperability
