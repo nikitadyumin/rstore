@@ -58,6 +58,47 @@ describe('internal observables', () => {
         signal();
     });
 
+    it('address/unsub from address', done => {
+        const address_ = rstore.address();
+        let i = 0;
+        function test(_v) {
+            i++;
+            setTimeout(() => {
+                if (i === 1) {
+                    done();
+                } else {
+                    done(new Error('extra calls'))
+                }
+            }, 10);
+        }
+        const subs = address_.subscribe({next: test});
+        address_.send(5);
+        subs();
+        address_.send(10);
+    });
+
+    it('address/toRx', done => {
+        const address_ = rstore.address();
+        let i = 0;
+        function test(v) {
+            i++;
+            setTimeout(() => {
+                if (i === 1) {
+                    if (v === 30) {
+                        done();
+                    } else {
+                        done(new Error('wrong number: ' + v))
+                    }
+                } else {
+                    done(new Error('extra calls'))
+                }
+            }, 10);
+        }
+        address_.toRx(Rx).map(x => x * 2).reduce((x,y) => x + y).subscribe({next: test});
+        address_.send(5);
+        address_.send(10);
+    });
+
     it('interval', done => {
         let i = 0;
         function test(v) {
