@@ -41,7 +41,7 @@ export function address() {
         },
         toRx: function(Rx_ = Rx) {
             return Rx_.Observable.create(o => {
-                return this.subscribe(o.next.bind(o));
+                return this.subscribe(o);
             });
         }
     }
