@@ -25,20 +25,27 @@ export function events(init) {
     }
 
     function transaction(revision) {
-        function commit() {
-
-        }
-
         function rollback() {
             const count = events.filter(e => e.rev <= revision).length;
             events.splice(count, events.length - count);
             deliver(project());
         }
 
+        const scheduled = [];
+
+        function run() {
+            if (scheduled.length) {
+                const t = scheduled.shift();
+                t(run, rollback);
+            }
+        }
+
         return {
             schedule: function(executor) {
-                executor(commit, rollback);
+                scheduled.push(executor);
+                return this;
             },
+            run,
             rollback
         }
     }
