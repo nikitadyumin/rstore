@@ -126,7 +126,7 @@ store({
 | `.toRx(Rx)` | converts a store to an Rx Observable |
  
 ## Interoperability
-###RxJS5###
+###RxJS5
 Observables are sources of changes
 ```javascript
 store({
@@ -144,7 +144,7 @@ store(2)
   .map(x => x * 2)
   .subscribe(v => console.log(v)); // 4
 ```
-###Redux###
+###Redux
 Reducers can be reused
 ```javascript
 const observableOfChanges = Rx.Observable.from([
