@@ -1,6 +1,7 @@
 /**
  * Created by ndyumin on 25.12.2015.
  */
+var Webpack = require('webpack');
 module.exports = {
     entry: "./src/index.js",
     output: {
@@ -19,5 +20,12 @@ module.exports = {
                 loader: 'babel-loader'
             }
         ]
-    }
+    },
+    plugins: [
+        new Webpack.optimize.UglifyJsPlugin({
+            compress: {
+                warnings: false
+            }
+        })
+    ]
 };
