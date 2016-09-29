@@ -2,7 +2,8 @@
 [![Join the chat at https://gitter.im/nikitadyumin/rstore](https://badges.gitter.im/nikitadyumin/rstore.svg)](https://gitter.im/nikitadyumin/rstore?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/nikitadyumin/rstore.svg?branch=master)](https://travis-ci.org/nikitadyumin/rstore)
 [![Coverage Status](https://coveralls.io/repos/github/nikitadyumin/rstore/badge.svg?branch=master)](https://coveralls.io/github/nikitadyumin/rstore?branch=master)
-
+[![Downloads This Month](https://img.shields.io/npm/dm/rstore.svg?maxAge=2592000)](https://npm-stat.com/charts.html?package=rstore)
+[![Downloads Total](https://img.shields.io/npm/dt/rstore.svg?maxAge=2592000)](https://npm-stat.com/charts.html?package=rstore)
 a straightforward, explicit, declarative and composable reactive store/model
 
 ## Introduction
