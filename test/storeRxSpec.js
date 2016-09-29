@@ -49,4 +49,18 @@ describe('store', () => {
 
         s.plug(Rx.Observable.of(1), (s, u) => u)
     });
+
+    it('converts to Rx streams', done => {
+        const sum = (x, y) => x + y;
+        const test = value => {
+            done(value === 20 ? null : new Error('wrong value ', value));
+        };
+
+        rstore
+            .store(0)
+            .plug(Rx.Observable.of(10), sum)
+            .toRx(Rx)
+            .map(x => x*2)
+            .subscribe(test);
+    })
 });

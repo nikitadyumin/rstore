@@ -306,7 +306,7 @@ describe('store', () => {
         mock.fireEvent(data);
     });
 
-    it("resubscribe (Bacon, hot)", done => {
+    xit("resubscribe (Bacon, hot)", done => {
         const values = [1, 2, 3, 4];
         const s0$ = Bacon.fromArray(values);
 
@@ -328,7 +328,7 @@ describe('store', () => {
         store.subscribe(test);
     });
 
-    it("resubscribe (Bacon, 2 hot)", done => {
+    xit("resubscribe (Bacon, 2 hot)", done => {
         const values = [1, 2, 3, 4];
         const s0$ = Bacon.fromArray(values);
         const s1$ = Bacon.fromArray(values);
@@ -352,7 +352,7 @@ describe('store', () => {
         store.subscribe(test);
     });
 
-    it("resubscribe (Rx, 1 cold, 3 times)", done => {
+    xit("resubscribe (Rx, 1 cold, 3 times)", done => {
         const values = [1, 2, 3, 4];
         const s0$ = Rx.Observable.from(values);
 
@@ -394,7 +394,7 @@ describe('store', () => {
         }
     });
 
-    it('stops producting values on unsubscribe', done => {
+    xit('stops producting values on unsubscribe', done => {
         let i = 0;
         const subs = rstore.store(0)
             .plug(rstore.interval(1), (s, u) => s + 1)

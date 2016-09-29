@@ -3,8 +3,8 @@
  */
 
 import lens from './lens';
-import store from './store/store';
-import { fromEvent, interval, bus, address } from './utils';
+import _store from './store/stk-store-adapter';
+import {fromEvent, interval, bus, address} from './utils';
 
 const lenses = {
     lens
@@ -17,4 +17,10 @@ const observableFactoryMethods = {
     address
 };
 
-module.exports = Object.assign({}, store, observableFactoryMethods, lenses);
+module.exports = Object.assign({
+    store: _store,
+    storeR: _store,
+    storeRx: _store,
+    storeBacon: _store,
+    storeMost: _store
+}, observableFactoryMethods, lenses);
