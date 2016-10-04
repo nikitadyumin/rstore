@@ -4,6 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/nikitadyumin/rstore/badge.svg?branch=master)](https://coveralls.io/github/nikitadyumin/rstore?branch=master)
 [![Downloads This Month](https://img.shields.io/npm/dm/rstore.svg?maxAge=2592000)](https://npm-stat.com/charts.html?package=rstore)
 [![Downloads Total](https://img.shields.io/npm/dt/rstore.svg?maxAge=2592000)](https://npm-stat.com/charts.html?package=rstore)
+
 a straightforward, explicit, declarative and composable reactive store/model
 
 ## Introduction
