@@ -407,4 +407,37 @@ describe('store', () => {
             }
         }
     });
+
+    it('is has an immediateFlush as a default strategy', () => {
+        let i = 0;
+        rstore.store(0)
+            .plug(Rx.Observable.from([1,2,3,4]), function(s, u) {
+                i += 1;
+                return s + u;
+            })
+            .subscribe(() => {});
+        expect(i).to.equal(4);
+    });
+
+    it('is possible to specify a flush strategy for a store', () => {
+        let i = 0;
+        let initials = [];
+        const testStrategy = project => (events, initial) => {
+            if (events.length < 2) {
+                return [events, initial];
+            } else {
+                const projection = project(events, initial);
+                initials.push(projection);
+                return [[], projection];
+            }
+        };
+        rstore.store(0, testStrategy)
+            .plug(Rx.Observable.from([1,2,3,4,5,6]), function(s, u) {
+                i += 1;
+                return s + u;
+            })
+            .subscribe(() => {});
+        expect(i).to.equal(6);
+        expect(initials.join()).to.equal([3, 10, 21].join());
+    });
 });

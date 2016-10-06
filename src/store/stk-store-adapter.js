@@ -1,7 +1,7 @@
 /**
  * Created by ndyumin on 29.09.2016.
  */
-const {store} = require('stk');
+const {store, flushStrategies} = require('stk');
 
 function fromCallbacks(next, error, complete) {
     return {
@@ -30,8 +30,8 @@ function wrapBacon(observable) {
     }
 }
 
-function _store(initial) {
-    const instance = store(initial);
+function _store(initial, strategy = flushStrategies.immediateFlushStrategy) {
+    const instance = store(initial, strategy);
     const plug = instance.plug.bind(instance);
     const subscribe = instance.subscribe.bind(instance);
     return Object.assign(instance, {

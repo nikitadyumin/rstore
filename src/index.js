@@ -4,6 +4,7 @@
 
 import lens from './lens';
 import _store from './store/stk-store-adapter';
+import {flushStrategies} from 'stk';
 import {fromEvent, interval, bus, address} from './utils';
 
 const lenses = {
@@ -11,6 +12,7 @@ const lenses = {
 };
 
 const observableFactoryMethods = {
+    flushStrategies,
     fromEvent,
     interval,
     bus,
