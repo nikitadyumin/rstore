@@ -10,4 +10,4 @@ script:
 after_success:
   - npm run coverage
   - npm run build
-  script: ./commit-build.sh
+  - ./commit-build.sh
