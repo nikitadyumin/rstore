@@ -7,6 +7,9 @@ cache:
 script:
   - npm test
 
+before_install:
+  - chmod ugo+x commit-build.sh
+
 after_success:
   - npm run coverage
   - npm run build
