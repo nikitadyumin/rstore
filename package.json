@@ -4,6 +4,7 @@
   "description": "a reactive state manager",
   "main": "./dist/rstore.js",
   "scripts": {
+    "build": "webpack",
     "test": "nyc mocha ./test",
     "coverage-html": "nyc report --reporter=html",
     "coverage": "nyc report --reporter=text-lcov|coveralls"
