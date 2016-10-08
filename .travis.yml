@@ -1,20 +1,17 @@
 language: node_js
-env:
-  global:
-    - secure: ZsofdXCKEfkuUahU728sTlgnRiHJXqP+tyKjLwj4nh1BuE/toBdnOWlXtBg9vhwyWXr/drHdhQ7yfME2/N26bg4ZZXELbqXe0/kBqCqeWE6ojZpJePPAp6gCng0OikucHfL8N/BMWxCDAKXpVzzGH7k2hQbbWi/FssHwXxfG6BPsH3TyYAjy6d+j2yRiz+4A+9Ndl2NGgCt+krdENvCFVOL/nK8g8a7l2PpwnnNYG3OSKZ0iuZ9vr6u6GqHrniWYnDp+OlUC65V4G0u3rIFbMRQ/CEPwq3qPTIDaUX+W/tuxAYbW1vkWXDnvCziGOM9T7NXkIXCW6sQZ2X+YHuAkD2CH7q0uR7FfeMai9mj+OcIePvBedTonEvKQM9FNj8l5CRndI8pR4HrSlKJdI4Tsc/pCNZKzObOCoVwW0Bv8zP3F22QmOmBaaUWkm58SLcYEeUf3k6nIjQwfRbhTNAuPlq14yMWwpwu0z9lbbjnmeyTXQn2sCOFJJa3YR+TuHe4+O1N4sfQGQ6Wi9awkOxznOHvW6UQ6EWNgHEgI8nb2UHLB2/4t+iUKwwHyCxQ9A7m9D1XTlbWgYVz+hgCDuhWoKV68yKht21aw9As9H/VQKzGPozbG9reQi/JFrJkLaI0N/P9DuEL5STRWBaJd48BI+nkO2QBuxLIoRFMJG5iQBNA=
-
 node_js:
-  - 6
+- 6
 cache:
   directories:
   - node_modules
 script:
-  - npm test
-
+- npm test
 before_install:
-  - chmod ugo+x commit-build.sh
-
+- chmod ugo+x commit-build.sh
 after_success:
-  - npm run coverage
-  - npm run build
-  - ./commit-build.sh
+- npm run coverage
+- npm run build
+- "./commit-build.sh"
+env:
+  global:
+    secure: cQPqdBVKhGn1A328lSqtnJb2l1d32rDVE/O+ryZt2U4OiZY9AKH/SqTxEeXJQDBCS2Xy0NJNpQ/O11xsZjKd7F8cnqROVuFgN+AOYJIu8r6s+N/OJZUC3UeVljcOuIfglZRP9N/MvKnOnU3iFJfLc0raI3vCit9u8nCtOPHX7iiM9d8nW9qXU1m9lqsl7TEoZj7fMyAGjlHK/6cjodPmrLlI7S6LXpvP/8oXhewYxAdACH3oCpAfMiV2slmGTl84ku2J+UuO9TuRBVkVndig+DgTjm6MuJ3l6XGUvsjScStEQPEcGQ0/kFha7+ifapsVN2PWdI19LoyiQevaexBYIw3TJJP9vWgMh4QxJZzGlEQ8tG0UYP0IvtaF2WKfK9KsSVlOC78krsG8qAPnhRAQNGk/pOZl+7MUJygCcRgZVMfJu4O23YMHx1mY1yKaWoS+zg3NO1+HsVSRS76s2Ca4rl3KHe2cYpQP9RZHsRBlzQ9RHvHQKxHTi6/2OH4EOtE287oPghwYlfOZzK44pUNYuFVFqm/eAyiyuzVPt/Ntga5tOoqJiXZcPTlENRhJCPPi9HVka7lUMJk10eDWPOg9z1goGEDHUdx9DdG1rxYCYxqyln09Nm+Y3mErYnjT5l8r3JFudL26Xtd3Tb8p+wHGHLSqaYurJHQoS6/ezFArqFQ=
