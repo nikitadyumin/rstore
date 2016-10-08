@@ -1,9 +1,11 @@
 language: node_js
 node_js:
   - 6
+
 cache:
   directories:
   - node_modules
+
 script:
   - npm test
 
@@ -13,7 +15,7 @@ after_success:
 
 deploy:
   provider: releases
-    api_key:
-      secure: "INQVN4GoT4ZVbh/QIoPfCEg6BBlW1p1OSMv15KBuU4TqU0wBxV4IZLriQvwpmM42OsbrdE9wXogGifGnnfXfBqNuVs1P0sJKtfgkgCx97wQ1sILIH/IM9/2Do5dfG7q+oeNE2/RfqlC8Etahw3noGhbaeNjXqhrOMxEkhZSaC7HIjVoY5o/X3MdooXbIr      ldTX7q17qOQ3onG16MfqdpPwW+0Vsvwv6abs0ygWhNrFdb9g4IvkIp2wMhT04VPYMRa6TN4NfA0rHjyRqypgIHgNslJ9BPxB8cKRPs7up0DMlJIfHkR5v0JxXlKGMKQUPzfC36m2CAIF0CpTZ83W+wF9oil/yy1gP6H4m5YbGGxz9U9z7Y6hv6XSo7xM9UrP6v+khKtk      QPP889ES03LMgNpNXjTpYDePvcOacXWqAekE9WHpzmDZGyQhUCgYAd2ulkuT5lFMwcAQMkaFS8arbsXaFK8sz+r8KR9m/AGD0QvagVOAPXlfz8lnYLgpgJOV9n/3DwfzUUroRqQyUBDDlIzZM3C77451E/Gmx5hFNoH8UedmPE8UBrbUR3VOgKJKW9PSt1n+TykEvavG      YZWklpMgqeey5oewcugnYu5GMcxBXk6sngRYw1jZUcpomVkMI/S+I/1DwOzVi5lOfhOzEuu2z28A4+0eXK5hONFeACVpj4="
+  api_key:
+    secure: "INQVN4GoT4ZVbh/QIoPfCEg6BBlW1p1OSMv15KBuU4TqU0wBxV4IZLriQvwpmM42OsbrdE9wXogGifGnnfXfBqNuVs1P0sJKtfgkgCx97wQ1sILIH/IM9/2Do5dfG7q+oeNE2/RfqlC8Etahw3noGhbaeNjXqhrOMxEkhZSaC7HIjVoY5o/X3MdooXbIrldTX7q17qOQ3onG16MfqdpPwW+0Vsvwv6abs0ygWhNrFdb9g4IvkIp2wMhT04VPYMRa6TN4NfA0rHjyRqypgIHgNslJ9BPxB8cKRPs7up0DMlJIfHkR5v0JxXlKGMKQUPzfC36m2CAIF0CpTZ83W+wF9oil/yy1gP6H4m5YbGGxz9U9z7Y6hv6XSo7xM9UrP6v+khKtkQPP889ES03LMgNpNXjTpYDePvcOacXWqAekE9WHpzmDZGyQhUCgYAd2ulkuT5lFMwcAQMkaFS8arbsXaFK8sz+r8KR9m/AGD0QvagVOAPXlfz8lnYLgpgJOV9n/3DwfzUUroRqQyUBDDlIzZM3C77451E/Gmx5hFNoH8UedmPE8UBrbUR3VOgKJKW9PSt1n+TykEvavGYZWklpMgqeey5oewcugnYu5GMcxBXk6sngRYw1jZUcpomVkMI/S+I/1DwOzVi5lOfhOzEuu2z28A4+0eXK5hONFeACVpj4="
   file: './dist/rstore.js'
   skip_cleanup: true
