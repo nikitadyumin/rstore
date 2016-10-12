@@ -1,6 +1,6 @@
 {
   "name": "rstore",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "a reactive state manager",
   "main": "./dist/rstore.js",
   "scripts": {
@@ -21,6 +21,9 @@
   },
   "keywords": [
     "state",
+    "event sourcing",
+    "cqrs",
+    "transaction",
     "elm",
     "es6",
     "es2015",
