@@ -5,18 +5,17 @@
 import lens from './lens';
 import _store from './store/stk-store-adapter';
 import {flushStrategies, devtools} from 'stk';
-import {fromEvent, interval, bus, address} from './utils';
+import {fromEvent, interval, address} from './utils';
 
 const lenses = {
     lens
 };
 
-const observableFactoryMethods = {
+const utils = {
     flushStrategies,
     devtools,
     fromEvent,
     interval,
-    bus,
     address
 };
 
@@ -26,4 +25,4 @@ module.exports = Object.assign({
     storeRx: _store,
     storeBacon: _store,
     storeMost: _store
-}, observableFactoryMethods, lenses);
+}, utils, lenses);

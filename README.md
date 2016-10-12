@@ -242,6 +242,16 @@ store({
 
 [more on composability](composability.md)
 
+## Redux DevTools Extension
+STK works with Redux Devtools Extension:
+- Install the [tools](https://github.com/zalmoxisus/redux-devtools-extension)
+- Connect one of the stores to the DevTools:
+```javascript
+const initial = 0;
+const store = rstore.store(initial);
+rstore.devtools.addStore(store, initial);
+```
+
 ## easy access to model fields
 In many cases model modification functions are just setters that take the current state and a new value as inputs and produce a new model. It might be hard to access\update deeply nested fields as it is desirable that functions stay pure and data stays immutable.
 
